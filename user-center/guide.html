@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>使用说明 — 复盘助手 V4</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="header">
+  <div class="container">
+    <div class="logo">复盘助手</div>
+    <div class="nav">
+      <a href="/">首页</a>
+      <a href="/buy">购买</a>
+      <a href="/activate">激活</a>
+      <a href="/guide">使用说明</a>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="container">
+
+    <div class="card">
+      <h2>安装</h2>
+      <div class="steps">
+        <div class="step">
+          <strong>下载安装包</strong>
+          <p>从首页点击下载，得到 复盘助手V4.exe</p>
+        </div>
+        <div class="step">
+          <strong>双击运行</strong>
+          <p>程序会自动扫描找到通达信安装路径。如果没找到，手动输入通达信所在目录（如 C:\new_tdx）</p>
+        </div>
+        <div class="step">
+          <strong>安装完成</strong>
+          <p>桌面会出现「复盘助手V4」快捷方式，定时任务自动创建完成，首次数据更新自动执行。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>每日使用</h2>
+      <div class="steps">
+        <div class="step">
+          <strong>18:00 自动更新</strong>
+          <p>定时任务自动拉取涨停、龙虎榜、概念数据，写入通达信板块文件。</p>
+        </div>
+        <div class="step">
+          <strong>18:00 后重启通达信</strong>
+          <p>通达信启动时读取最新的板块文件，你直接在板块列表和行情列表中查看数据。</p>
+        </div>
+        <div class="step">
+          <strong>微信推送（如已绑定）</strong>
+          <p>更新完成后微信自动收到复盘数据推送。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>查看自定义数据列</h2>
+      <p>在通达信行情列表中，右键表头 → 选择自定义数据 → 勾选数据号 1、2、3：</p>
+      <ul style="margin:12px 0 0 20px;line-height:2;">
+        <li><strong>数据号 1</strong> — 涨停原因（每只股的涨停逻辑）</li>
+        <li><strong>数据号 2</strong> — 所属概念（该股所属的热点概念）</li>
+        <li><strong>数据号 3</strong> — 龙虎榜（净买额+买卖前3席位）</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>导入看盘界面</h2>
+      <p>安装后看盘界面文件（DBKPJM.sp）已复制到通达信目录。如需导入：</p>
+      <p style="background:#f5f5f5;padding:12px;border-radius:6px;margin-top:8px;">
+        通达信 → 功能 → 定制版面 → 导入版面 → 选择 C:\new_tdx\T0002\pad\DBKPJM.sp
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>卸载</h2>
+      <p>运行命令：</p>
+      <p style="background:#f5f5f5;padding:12px;border-radius:6px;font-family:monospace;">
+        复盘助手V4.exe --uninstall
+      </p>
+      <p style="margin-top:8px;">将删除安装目录、桌面快捷方式和定时任务。</p>
+    </div>
+
+    <div class="card">
+      <h2>常见问题</h2>
+      <p><strong>Q: 通达信里看不到板块？</strong></p>
+      <p>确认通达信路径设置正确，然后点击「立即更新」。更新后右键板块列表 → 刷新。</p>
+      <p style="margin-top:12px;"><strong>Q: 定时任务没跑？</strong></p>
+      <p>打开任务计划程序，确认「复盘助手_数据更新」存在且启用。检查 logs 目录下的日志文件。</p>
+      <p style="margin-top:12px;"><strong>Q: 试用到期后数据还在吗？</strong></p>
+      <p>在的。到期后每日更新暂停，但通达信中已有的板块数据可以正常查看。</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  <div class="container">
+    <p><a href="mailto:luoxmp@126.com">luoxmp@126.com</a></p>
+  </div>
+</div>
+
+</body>
+</html>

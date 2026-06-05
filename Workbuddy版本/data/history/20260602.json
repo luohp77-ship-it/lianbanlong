@@ -1,0 +1,22 @@
+{
+  "date": "20260602",
+  "limitUp": 73,
+  "limitDown": 15,
+  "maxBoard": 3,
+  "premiumRate": 0,
+  "zhabanRate": 32.6,
+  "concepts": [
+    {
+      "name": "一季报增长",
+      "count": 8
+    },
+    {
+      "name": "机器人",
+      "count": 5
+    },
+    {
+      "name": "AI应用",
+      "count": 3
+    }
+  ]
+}

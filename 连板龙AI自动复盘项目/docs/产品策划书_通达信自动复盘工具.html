@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通达信自动复盘工具 — 产品策划书（网页+引擎方案）</title>
+<style>
+  /* ── 全局 ── */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    line-height: 1.7;
+    padding: 40px 20px;
+  }
+  .container { max-width: 1100px; margin:0 auto; }
+
+  /* ── 封面 ── */
+  .cover {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    border-radius: 16px;
+    padding: 60px 40px;
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 70%, rgba(233,69,96,.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(83,194,228,.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .cover h1 { font-size: 36px; font-weight: 700; margin-bottom: 12px; position:relative; }
+  .cover .tagline {
+    font-size: 18px; color: rgba(255,255,255,.7); margin-bottom: 24px; position:relative;
+  }
+  .cover .meta {
+    display: inline-block; background: rgba(255,255,255,.1); border-radius: 8px;
+    padding: 8px 20px; font-size: 14px; color: rgba(255,255,255,.6); position:relative;
+  }
+  .cover .meta span { margin: 0 12px; }
+  .cover .badge {
+    display: inline-block; background: #e94560; color:#fff; border-radius: 20px;
+    padding: 4px 16px; font-size: 13px; font-weight: 600; margin-top: 16px; position:relative;
+  }
+  .cover .highlight {
+    background: rgba(233,69,96,.2); border: 1px solid rgba(233,69,96,.4);
+    border-radius: 8px; padding: 12px 24px; margin-top: 20px;
+    display: inline-block; font-size: 15px; position:relative;
+  }
+
+  /* ── 章节 ── */
+  .section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 36px 40px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .section h2 {
+    font-size: 24px; font-weight: 700; color: #0f3460;
+    border-left: 4px solid #e94560; padding-left: 16px;
+    margin-bottom: 24px;
+  }
+  .section h3 {
+    font-size: 18px; font-weight: 600; color: #1a1a2e;
+    margin: 24px 0 12px; padding-bottom: 6px;
+    border-bottom: 1px solid #eee;
+  }
+  .section h4 {
+    font-size: 15px; font-weight: 600; color: #333;
+    margin: 16px 0 8px;
+  }
+  .section p { margin-bottom: 12px; color: #444; }
+  .section ul, .section ol { margin: 8px 0 16px 24px; color: #444; }
+  .section li { margin-bottom: 6px; }
+
+  /* ── 表格 ── */
+  table {
+    width: 100%; border-collapse: collapse; margin: 16px 0;
+    font-size: 14px;
+  }
+  th {
+    background: #f0f2f5; color: #1a1a2e; font-weight: 600;
+    padding: 10px 12px; text-align: left; border: 1px solid #e0e0e0;
+  }
+  td {
+    padding: 9px 12px; border: 1px solid #e8e8e8;
+  }
+  tr:nth-child(even) td { background: #fafafa; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ── 提示框 ── */
+  .tip {
+    background: #e8f4fd; border-left: 4px solid #2196F3;
+    border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 16px 0;
+    font-size: 14px; color: #1a237e;
+  }
+  .warn {
+    background: #fff3e0; border-left: 4px solid #ff9800;
+    border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 16px 0;
+    font-size: 14px; color: #e65100;
+  }
+  .ok {
+    background: #e8f5e9; border-left: 4px solid #4caf50;
+    border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 16px 0;
+    font-size: 14px; color: #1b5e20;
+  }
+
+  /* ── 文本流程图 ── */
+  .flow {
+    background: #1a1a2e; color: #e0e0e0; border-radius: 10px;
+    padding: 20px 24px; margin: 16px 0;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px; line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* ── 架构/界面图 ── */
+  .arch {
+    background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 10px;
+    padding: 20px; margin: 16px 0; overflow-x: auto;
+  }
+  .arch pre {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px; line-height: 1.5;
+    color: #333;
+  }
+
+  /* ── 标签 ── */
+  .tag {
+    display: inline-block; border-radius: 4px; padding: 2px 8px;
+    font-size: 12px; font-weight: 600; margin: 0 2px;
+  }
+  .tag-green { background: #e8f5e9; color: #2e7d32; }
+  .tag-orange { background: #fff3e0; color: #e65100; }
+  .tag-blue { background: #e3f2fd; color: #1565c0; }
+  .tag-red { background: #fce4ec; color: #c62828; }
+
+  /* ── 交付卡片 ── */
+  .deliverable-row {
+    display: flex; gap: 16px; margin: 16px 0;
+  }
+  .deliverable-card {
+    flex: 1; border-radius: 10px; padding: 20px;
+    border: 1px solid #e0e0e0; background: #fafafa;
+  }
+  .deliverable-card h4 { margin-bottom: 8px; font-size: 16px; }
+  .deliverable-card ul { margin-left: 16px; color: #444; font-size: 14px; }
+  .deliverable-card li { margin-bottom: 4px; }
+  .deliverable-card .big-icon { font-size: 32px; margin-bottom: 8px; }
+  .card-primary { border-color: #0f3460; background: #f0f4fa; }
+  .card-accent { border-color: #e94560; background: #fdf0f2; }
+
+  /* ── 文件树 ── */
+  .filetree {
+    background: #fafafa; border: 1px solid #e8e8e8; border-radius: 8px;
+    padding: 16px 20px; margin: 12px 0;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px; line-height: 1.7;
+  }
+  .filetree .dir { color: #0f3460; font-weight: 600; }
+  .filetree .file { color: #333; margin-left: 20px; }
+  .filetree .comment { color: #999; font-style: italic; }
+
+  /* ── 引用 ── */
+  .quote {
+    background: #fafafa; border-left: 4px solid #0f3460;
+    border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0;
+    font-size: 16px; font-weight: 500; color: #1a1a2e;
+  }
+
+  /* ── 步骤列表 ── */
+  .step-list { counter-reset: step; margin: 16px 0; }
+  .step-item {
+    counter-increment: step;
+    padding: 12px 16px 12px 48px; position: relative;
+    margin-bottom: 8px; background: #fafafa;
+    border-radius: 8px; border-left: 3px solid #0f3460;
+  }
+  .step-item::before {
+    content: counter(step);
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #0f3460; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+  }
+
+  /* ── 对比卡片 ── */
+  .compare-row { display: flex; gap: 16px; margin: 16px 0; }
+  .compare-card {
+    flex: 1; border-radius: 10px; padding: 20px;
+    border: 1px solid #e0e0e0; background: #fafafa;
+  }
+  .compare-card h4 { font-size: 16px; margin-bottom: 8px; }
+  .compare-card ul { margin-left: 16px; color: #444; font-size: 14px; }
+  .compare-card li { margin-bottom: 4px; }
+  .card-best { border: 2px solid #4caf50; background: #f1f8e9; }
+
+  /* ── 响应式 ── */
+  @media (max-width:768px) {
+    body { padding: 16px 10px; }
+    .section { padding: 20px; }
+    .cover { padding: 32px 20px; }
+    .cover h1 { font-size: 24px; }
+    .deliverable-row, .compare-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- ======================== 封面 ======================== -->
+<div class="cover">
+  <h1>📊 通达信自动复盘工具</h1>
+  <div class="tagline">一个 exe · 网页里安装 · 网页里看可视化复盘 · 通达信里看板块</div>
+  <div class="meta">
+    <span>📅 2026-05-31</span>
+    <span>📄 V3.0（网页+引擎最终方案）</span>
+    <span>🏷️ 产品策划书</span>
+  </div>
+  <div class="badge">✅ 方案已确认</div>
+  <div class="highlight">用户只下载一个文件，所有交互都在浏览器里完成</div>
+</div>
+
+<!-- ======================== 目录 ======================== -->
+<div class="section">
+  <h2>📑 目录</h2>
+  <ol style="font-size:15px; column-count:2; column-gap:30px;">
+    <li><a href="#s1">产品概述</a></li>
+    <li><a href="#s2">产品形态：网页+引擎</a></li>
+    <li><a href="#s3">产品功能（完整版）</a></li>
+    <li><a href="#s4">网页界面设计</a></li>
+    <li><a href="#s5">产品架构</a></li>
+    <li><a href="#s6">启动机制</a></li>
+    <li><a href="#s7">产品交付形态</a></li>
+    <li><a href="#s8">技术状态与开发计划</a></li>
+    <li><a href="#s9">竞品差异</a></li>
+    <li><a href="#s10">附录</a></li>
+  </ol>
+</div>
+
+
+<!-- ==================== 一、产品概述 ==================== -->
+<div class="section" id="s1">
+  <h2>一、产品概述</h2>
+
+  <h3>1.1 一句话定义</h3>
+  <div class="quote">
+    用户下载一个 exe，双击后在浏览器里完成安装配置，每天自动更新通达信板块和可视化复盘看板，收盘后微信推送摘要到手机。
+  </div>
+
+  <h3>1.2 解决的用户痛点</h3>
+  <table>
+    <tr><th style="width:130px">痛点</th><th style="width:240px">现状</th><th>本产品方案</th></tr>
+    <tr><td>涨停跌停还要手动翻</td><td>收盘后逐个翻看</td><td>自动抓取全量数据，分类写入通达信板块</td></tr>
+    <tr><td>连板数要自己算</td><td>记不住每个股连板数</td><td>自动计算首板~5板以上</td></tr>
+    <tr><td>龙虎榜要切网站看</td><td>打开东财/同花顺翻</td><td>自动拉取写入板块+网页可视化</td></tr>
+    <tr><td>不知道今天热点在哪</td><td>凭感觉猜</td><td>板块热度 TOP10 + 概念关系图</td></tr>
+    <tr><td>不知道昨天涨停今天表现</td><td>手动翻回去看</td><td>自动统计晋级率/溢价率/断板率</td></tr>
+    <tr><td>收盘后不在电脑前</td><td>收不到复盘信息</td><td>微信推送复盘摘要到手机</td></tr>
+    <tr><td>每天复盘工作重复枯燥</td><td>每天做同一套</td><td>全自动，打开浏览器看可视化报告</td></tr>
+  </table>
+
+  <h3>1.3 目标用户画像</h3>
+  <table>
+    <tr><th>维度</th><th>描述</th></tr>
+    <tr><td>身份</td><td>散户股民，有每日复盘习惯</td></tr>
+    <tr><td>软件</td><td>使用通达信（及同花顺、东方财富等券商版）</td></tr>
+    <tr><td>关注点</td><td>涨停板、连板效应、龙虎榜资金、板块热点</td></tr>
+    <tr><td>操作水平</td><td>会双击 exe、会打开浏览器</td></tr>
+    <tr><td>设备</td><td>Windows 电脑 + 手机（看微信推送）</td></tr>
+  </table>
+</div>
+
+
+<!-- ==================== 二、产品形态：网页+引擎 ==================== -->
+<div class="section" id="s2">
+  <h2>二、产品形态：网页+引擎</h2>
+
+  <h3>2.1 用户拿到的唯一文件</h3>
+  <div class="arch">
+<pre>┌──────────────────────────────────────────────────────┐
+│           用户下载一个文件                            │
+│                                                      │
+│         📦 复牌助手_v1.0.exe                         │
+│                                                      │
+│  双击运行 → 浏览器自动打开 http://localhost:8765      │
+│                                                      │
+│  ┌────────────────────────────────────────────┐      │
+│  │           浏览器里的世界                      │      │
+│  │                                            │      │
+│  │  ┌────────┐  ┌────────┐  ┌───────────┐    │      │
+│  │  │ 📦安装  │  │ 📊复盘  │  │ ⚙️设置   │    │      │
+│  │  │ 向导    │  │ 看板    │  │ 面板     │    │      │
+│  │  └────────┘  └────────┘  └───────────┘    │      │
+│  └────────────────────────────────────────────┘      │
+│                                                      │
+│  用户 → 浏览器 → fetch('/api/...') → 本地引擎        │
+│  引擎 → 写通达信板块 / 注册定时任务 / 替换快捷方式    │
+│                                                      │
+└──────────────────────────────────────────────────────┘</pre>
+  </div>
+
+  <h3>2.2 为什么是"一个exe"</h3>
+  <p>浏览器有安全沙箱，无法直接读写文件系统、调用 Windows API。所以需要一个小型本地服务器来处理系统操作。</p>
+
+  <div class="compare-row">
+    <div class="compare-card">
+      <div class="big-icon">❌</div>
+      <h4>纯网页（不行）</h4>
+      <ul>
+        <li>展示图表 ✅</li>
+        <li>用户勾选配置 ✅</li>
+        <li>写通达信板块文件 ❌</li>
+        <li>注册定时任务 ❌</li>
+        <li>替换快捷方式 ❌</li>
+      </ul>
+    </div>
+    <div class="compare-card card-best">
+      <div class="big-icon">✅</div>
+      <h4>一个exe（行）</h4>
+      <ul>
+        <li>内嵌 HTTP 服务器 → 网页交互</li>
+        <li>展示图表 ✅（网页上）</li>
+        <li>用户勾选配置 ✅（网页上）</li>
+        <li>写通达信板块 ✅（引擎做）</li>
+        <li>注册定时任务 ✅（引擎做）</li>
+        <li>替换快捷方式 ✅（引擎做）</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <div class="big-icon">😞</div>
+      <h4>APP（也行，但不够好）</h4>
+      <ul>
+        <li>需要双 exe（引擎+配置面板）</li>
+        <li>可视化能力弱</li>
+        <li>界面开发成本高</li>
+        <li>更新配置不方便</li>
+        <li>不支持图表展示</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>2.3 技术原理</h3>
+  <div class="step-list">
+    <div class="step-item"><strong>启动：</strong>用户双击 exe → 程序启动内嵌的 HTTP 服务器（端口 8765）→ 自动打开浏览器访问 <code>http://localhost:8765</code></div>
+    <div class="step-item"><strong>交互：</strong>网页上的每个操作按钮（安装、更新、设置）都通过 <code>fetch('/api/xxx')</code> 调用本地服务器</div>
+    <div class="step-item"><strong>执行：</strong>本地服务器收到请求 → 执行对应的系统操作（写文件、注册任务等）→ 返回结果到网页</div>
+    <div class="step-item"><strong>数据：</strong>引擎每日执行完成后，将数据写入 <code>data/latest.json</code> → 网页读取并渲染图表</div>
+    <div class="step-item"><strong>后台：</strong>exe 缩到系统托盘，保持 HTTP 服务器运行，用户随时打开浏览器查看</div>
+  </div>
+
+  <div class="ok">
+    <strong>与纯网页方案的区别：</strong>虽然用户看到的是浏览器页面，但这个页面是由本地的 exe 提供的（localhost:8765），
+    不是公网服务器。所以它可以调用本地操作系统的能力。用户不需要联网，也不需要部署服务器。
+  </div>
+</div>
+
+
+<!-- ==================== 三、产品功能（完整版） ==================== -->
+<div class="section" id="s3">
+  <h2>三、产品功能（完整版）</h2>
+
+  <p>以下所有功能均为 V1.0 一次性实现：</p>
+
+  <h3>3.1 功能总览</h3>
+  <table>
+    <tr>
+      <th style="width:40px">#</th>
+      <th style="width:160px">功能模块</th>
+      <th style="width:70px">状态</th>
+      <th>说明</th>
+      <th>展示形式</th>
+    </tr>
+    <tr>
+      <td style="text-align:center">1</td>
+      <td><strong>涨停梯队分类</strong></td>
+      <td style="text-align:center"><span class="tag tag-green">✅ 已有</span></td>
+      <td>首板/2连板/3连板/4连板/5板以上</td>
+      <td>通达信板块 + 网页看板</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">2</td>
+      <td><strong>龙虎榜前20</strong></td>
+      <td style="text-align:center"><span class="tag tag-green">✅ 已有</span></td>
+      <td>净买入TOP20 按金额排序</td>
+      <td>通达信板块 + 网页看板</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">3</td>
+      <td><strong>跌停梯队</strong></td>
+      <td style="text-align:center"><span class="tag tag-red">🆕 新增</span></td>
+      <td>跌停分类 + 连跌天数</td>
+      <td>通达信板块 + 网页看板</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">4</td>
+      <td><strong>炸板监控</strong></td>
+      <td style="text-align:center"><span class="tag tag-red">🆕 新增</span></td>
+      <td>涨停打开标记 + 封板率统计</td>
+      <td>通达信板块 + 网页看板</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">5</td>
+      <td><strong>昨涨停今表现</strong></td>
+      <td style="text-align:center"><span class="tag tag-red">🆕 新增</span></td>
+      <td>晋级率/溢价率/断板率</td>
+      <td>网页看板 + 微信推送</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">6</td>
+      <td><strong>板块热度统计</strong></td>
+      <td style="text-align:center"><span class="tag tag-red">🆕 新增</span></td>
+      <td>涨停股按行业/概念聚合排行</td>
+      <td>网页看板（柱状图）+ 通达信板块</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">7</td>
+      <td><strong>微信推送</strong></td>
+      <td style="text-align:center"><span class="tag tag-red">🆕 新增</span></td>
+      <td>收盘复盘摘要推送手机</td>
+      <td>微信卡片</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">8</td>
+      <td><strong>可视化看板</strong></td>
+      <td style="text-align:center"><span class="tag tag-red">🆕 新增</span></td>
+      <td>宏观总览/涨停趋势/晋级路线图</td>
+      <td>浏览器（HTML+Chart.js）</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">9</td>
+      <td><strong>网页安装+配置</strong></td>
+      <td style="text-align:center"><span class="tag tag-red">🆕 新增</span></td>
+      <td>浏览器内完成安装配置</td>
+      <td>浏览器</td>
+    </tr>
+  </table>
+</div>
+
+
+<!-- ==================== 四、网页界面设计 ==================== -->
+<div class="section" id="s4">
+  <h2>四、网页界面设计</h2>
+
+  <p>整个产品只对应一个网页，通过标签页切换不同功能。以下为每个标签页的界面原型：</p>
+
+  <!-- ── Tab 1: 安装向导 ── -->
+  <h3>4.1 Tab 1：安装向导</h3>
+  <p>用户第一次运行时看到这个页面：</p>
+  <div class="arch">
+<pre>
+┌─────────────────────────────────────────────────────────────────────┐
+│  📦 复牌助手 · 安装向导                              _ □ ×        │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  第一步：选择交易软件                         ⚙️ 状态：运行正常      │
+│                                                                     │
+│  ✅ 通达信    C:\new_tdx\TdxW.exe                      [更改]      │
+│  ❌ 同花顺    未检测到                                           │
+│  🔍 搜索其他软件...                                                   │
+│                                                                     │
+│  第二步：选择复盘内容                                               │
+│  ┌─────────────────────────────────────────────┐                    │
+│  │ ☑ 涨停梯队  ☑ 跌停梯队  ☑ 龙虎榜前20       │                    │
+│  │ ☑ 板块热度  ☑ 炸板监控  ☑ 昨涨停今表现     │                    │
+│  │ ☑ 可视化看板（折线图/柱状图/关系图）        │                    │
+│  └─────────────────────────────────────────────┘                    │
+│                                                                     │
+│  第三步：微信推送（可选）                                           │
+│  📱 扫码绑定 → 每天收盘收到复盘摘要                                  │
+│  [ 生成二维码 ]  当前状态：未绑定                                    │
+│                                                                     │
+│  第四步：更新方式                                                   │
+│  ☑ 收盘后自动更新（15:30）                                          │
+│  ☑ 打开通达信时自动更新（替换快捷方式）                               │
+│                                                                     │
+│  ┌─────────────────────────────────────────────┐                    │
+│  │           [ 🚀 开始安装 ]                   │                    │
+│  │  ① 写入板块配置  ✅  ② 部署引擎  ✅         │                    │
+│  │  ③ 注册定时任务  ✅  ④ 替换快捷方式 ✅       │                    │
+│  │  ⑤ 首次数据更新  ⏳ ━━━━━━━━━━━━  80%       │                    │
+│  └─────────────────────────────────────────────┘                    │
+│                                                                     │
+│  ✅ 安装完成！打开通达信即可看到复盘板块。                           │
+│                                                                     ┘
+└──────────────────────────────────────────────────────────────────────</pre>
+  </div>
+
+  <!-- ── Tab 2: 今日复盘总览 ── -->
+  <h3>4.2 Tab 2：今日复盘总览</h3>
+  <p>每天打开浏览器看到的核心页面：</p>
+  <div class="arch">
+<pre>
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  📊 2026-05-29 收盘复盘              [🔄 刷新] [⚙️ 设置]         📅 历史  │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐      │
+│  │ 📈 涨停   │  │ 📉 跌停   │  │ 🎯 封板率 │  │ 🏆 最高板 │  │ 💰 总金额 │      │
+│  │   49只    │  │   8只     │  │   86%     │  │   5板    │  │  382亿   │      │
+│  │   +12%    │  │   -3%    │  │   +5%     │  │ 浙江广厦 │  │   +8%    │      │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘  └──────────┘      │
+│                                                                              │
+│  ┌───────────────────────────────────────────────────────────┐               │
+│  │  📈 涨停家数趋势（近10日）                                │               │
+│  │                                                           │               │
+│  │  60┤            ██                                        │               │
+│  │  50┤      ██    ██  ██    ██    ██                         │               │
+│  │  40┤ ██   ██ ██ ██  ██ ██ ██  ██ ██                       │               │
+│  │  30┤ ██ ██ ██ ██ ██ ██ ██ ██ ██ ██ ██                     │               │
+│  │     ─────────────────────────────────────                  │               │
+│  │     20  21  22  23  26  27  28  29  (日)                  │               │
+│  └───────────────────────────────────────────────────────────┘               │
+│                                                                              │
+│  ┌─────────────────────────────┐  ┌────────────────────────────────────┐     │
+│  │  📋 涨停梯队                │  │  🔥 热点板块 TOP5                 │     │
+│  │                             │  │                                    │     │
+│  │  首板   40 ████████████████ │  │  电力     8只 ████████████      │     │
+│  │  2连板   5 ███              │  │  人工智能  5只 ████████         │     │
+│  │  3连板   2 █                │  │  半导体    4只 ██████           │     │
+│  │  4连板   0 █                │  │  新能源车  3只 ████             │     │
+│  │  5板+    2 █                │  │  医药      3只 ████             │     │
+│  │                             │  │                                    │     │
+│  │  一进二：12.5%  │  二进三：40% │  └────────────────────────────────────┘     │
+│  └─────────────────────────────┘                                          │
+│                                                                              │
+│  ┌───────────────────────────────────────────────────────────┐               │
+│  │  🐉 龙虎榜净买入 TOP5                                     │               │
+│  │                                                           │               │
+│  │  中兴通讯  ████████████████████  +3.2亿  涨幅 +10%       │               │
+│  │  宁德时代  ██████████████        +2.1亿  涨幅 +8.5%      │               │
+│  │  贵州茅台  ██████████            +1.8亿  涨幅 +3.2%      │               │
+│  │  比亚迪    ███████               +0.9亿  涨幅 +6.7%      │               │
+│  │  北方华创  ████                  +0.5亿  涨幅 +5.1%      │               │
+│  │                                                           │               │
+│  │  净买入总额：8.5亿  │  游资参与：3家（欢乐海岸、赵老哥等）  │               │
+│  └───────────────────────────────────────────────────────────┘               │
+│                                                                              │
+│  ┌───────────────────────────────────────────────────────────┐               │
+│  │  🏆 连板晋级路线图                                        │               │
+│  │                                                           │               │
+│  │  5板以上  ── 600162 浙江广厦 ── 600726 华电能源           │               │
+│  │                      ↓                    ↓               │               │
+│  │  3连板    ── 000539 粤电力A ── 603011 合锻智能            │               │
+│  │                      ↓                    ↓               │               │
+│  │  2连板    ── 000090 天健集团 ── 002995 天地在线           │               │
+│  │               002806 世嘉科技 ── 600110 诺德股份           │               │
+│  │               603324 盛剑科技                              │               │
+│  │                      ↓                                    │               │
+│  │  首板      ── 40只...                                     │               │
+│  └───────────────────────────────────────────────────────────┘               │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘</pre>
+  </div>
+
+  <!-- ── Tab 3: 更多分析 ── -->
+  <h3>4.3 Tab 3：深度分析</h3>
+  <div class="arch">
+<pre>
+┌──────────────────────────────────────────────────────────────────────────┐
+│  📈 深度分析               [涨停分析] [跌停分析] [资金流向] [概念热度]   │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌────────────────────────────────────────────┐                          │
+│  │  🕸️ 概念热度网络图                          │                          │
+│  │                                            │                          │
+│  │        ┌──────电力(8)──────┐               │                          │
+│  │        │        │          │               │                          │
+│  │     光伏(3)  风电(2)   储能(2)              │                          │
+│  │        │        │          │               │                          │
+│  │        └───────┬───────────┘               │                          │
+│  │                ▼                           │                          │
+│  │   ┌─────AI(5)────┬────芯片(4)───┐          │                          │
+│  │   │       │                  │             │                          │
+│  │  算力(3) 机器人(2)  封测(2)               │                          │
+│  │          │                  │              │                          │
+│  │      新能车(3)──────锂电(2)                │                          │
+│  │                                            │                          │
+│  │  圆圈大小 = 涨停数量  │  连线 = 概念重叠    │                          │
+│  └────────────────────────────────────────────┘                          │
+│                                                                          │
+│  ┌──────────────────────────┐  ┌─────────────────────────────────────┐  │
+│  │  📉 跌停分析              │  │  💰 资金流向（龙虎榜）              │  │
+│  │                          │  │                                     │  │
+│  │  今日跌停：8只            │  │  净买入总额：8.5亿                  │  │
+│  │  首跌停：5只              │  │  净卖出总额：3.2亿                  │  │
+│  │  连跌停：3只              │  │  净差额：+5.3亿                    │  │
+│  │  炸板：4只                │  │  上榜游资：3家                     │  │
+│  │  封板率：86%              │  │                                     │  │
+│  └──────────────────────────┘  └─────────────────────────────────────┘  │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘</pre>
+  </div>
+
+  <!-- ── Tab 4: 设置面板 ── -->
+  <h3>4.4 Tab 4：设置面板</h3>
+  <div class="arch">
+<pre>
+┌──────────────────────────────────────────────────────────────────────┐
+│  ⚙️ 设置                     [保存] [恢复默认]                      │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  📋 复盘内容                                                         │
+│  ☑ 涨停梯队    ☑ 跌停梯队    ☑ 龙虎榜前20                           │
+│  ☑ 板块热度    ☑ 炸板监控    ☑ 昨涨停今表现                         │
+│  ☑ 可视化看板图表                                                     │
+│                                                                      │
+│  ⏰ 更新设置                                                         │
+│  ☑ 收盘后自动更新        时间：[15:30]  ▼                            │
+│  ☑ 打开通达信时自动更新   （替换快捷方式 → launcher.exe）            │
+│                                                                      │
+│  📱 微信推送                                                         │
+│  ☑ 启用微信推送          当前状态：未绑定  [📱 扫码绑定]            │
+│                                                                      │
+│  🖥️ 交易软件                                                        │
+│  通达信路径：C:\new_tdx\TdxW.exe                         [浏览...]  │
+│  板块目录：C:\new_tdx\T0002\blocknew\                               │
+│                                                                      │
+│  💾 数据管理                                                         │
+│  [🗑️ 清除所有板块数据]  [📦 导出配置]  [📥 导入配置]                │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘</pre>
+  </div>
+
+  <h3>4.5 微信推送卡片设计</h3>
+  <div class="arch">
+<pre>
+┌────────────────────────────────────┐
+│  📊 5月29日 收盘复盘简报           │
+│                                    │
+│  📈 涨停梯队                       │
+│  首板 40只 │ 2连板 5只 │ 3连板 2只 │
+│  最高板：5板（浙江广厦、华电能源）  │
+│                                    │
+│  📉 跌停概览                       │
+│  今日跌停 8只                      │
+│  封板率 86%                        │
+│                                    │
+│  🔥 热点板块 TOP5                  │
+│  ① 电力      8只涨停              │
+│  ② 人工智能  5只涨停              │
+│  ③ 半导体    4只涨停              │
+│  ④ 新能源车  3只涨停              │
+│  ⑤ 医药      3只涨停              │
+│                                    │
+│  🐉 龙虎榜净买入 TOP3              │
+│  ① 中兴通讯   +3.2亿              │
+│  ② 宁德时代   +2.1亿              │
+│  ③ 贵州茅台   +1.8亿              │
+│                                    │
+│  📈 昨日涨停今表现                 │
+│  一进二成功率：12.5%               │
+│  二进三成功率：40%                 │
+│                                    │
+│  👉 点此查看完整复盘报告           │
+│  （链接到本地看板）                │
+└────────────────────────────────────┘</pre>
+  </div>
+</div>
+
+
+<!-- ==================== 五、产品架构 ==================== -->
+<div class="section" id="s5">
+  <h2>五、产品架构</h2>
+
+  <h3>5.1 系统架构图</h3>
+  <div class="arch">
+<pre>┌────────────────────────────────────────────────────────────────────────────────────┐
+│                          复牌助手 · 系统架构（网页+引擎方案）                       │
+├────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                    │
+│  ┌──────────────────────────────────────────────────────────────────────┐          │
+│  │  用户交互层                                                          │          │
+│  │                                                                      │          │
+│  │  ┌──────────────────────────────────────────────────────┐            │          │
+│  │  │  浏览器 → http://localhost:8765                       │            │          │
+│  │  │                                                       │            │          │
+│  │  │  ┌──────┐  ┌────────┐  ┌───────┐  ┌───────┐         │            │          │
+│  │  │  │安装导 │  │复盘总览│  │深度   │  │设置   │         │            │          │
+│  │  │  │航     │  │ 看板   │  │分析   │  │面板   │         │            │          │
+│  │  │  └──────┘  └────────┘  └───────┘  └───────┘         │            │          │
+│  │  │                                                       │            │          │
+│  │  │  Chart.js / ECharts (图表)  │  fetch('/api/*') (操作)  │            │          │
+│  │  └──────────────────────────────────────────────────────┘            │          │
+│  └─────────────────────────┬────────────────────────────────────────────┘          │
+│                            │                                                    │
+│  ┌─────────────────────────▼────────────────────────────────────────────┐          │
+│  │  API 层 (HTTP 服务器 :8765)                                          │          │
+│  │                                                                      │          │
+│  │  GET  /api/status        → 引擎状态、上次更新时间                      │          │
+│  │  GET  /api/dashboard     → 今日复盘总览数据 (latest.json)             │          │
+│  │  GET  /api/config        → 当前配置                                  │          │
+│  │  POST /api/config        → 保存配置到 config.json                    │          │
+│  │  POST /api/install       → 执行安装流程                               │          │
+│  │  POST /api/update        → 手动触发数据更新                           │          │
+│  │  GET  /api/history       → 历史趋势数据                               │          │
+│  │  POST /api/uninstall     → 卸载                                      │          │
+│  └─────────────────────────┬────────────────────────────────────────────┘          │
+│                            │                                                    │
+│  ┌─────────────────────────▼────────────────────────────────────────────┐          │
+│  │  引擎层                                                               │          │
+│  │                                                                      │          │
+│  │  ┌────────────┐  ┌────────────┐  ┌──────────────┐  ┌───────────┐   │          │
+│  │  │  数据获取   │→│  计算处理   │→│  写入通达信   │→│  推送通知  │   │          │
+│  │  │ ①涨停数据  │  │ ①连板天数   │  │ ① .blk文件   │  │ ①微信推送 │   │          │
+│  │  │ ②跌停数据  │  │ ②连跌天数   │  │ ② blocknew  │  │ ②系统通知 │   │          │
+│  │  │ ③龙虎榜    │  │ ③板块聚合   │  │ ③ gridtab   │  │            │   │          │
+│  │  │ ④个股行情  │  │ ④昨今对比   │  │              │  │            │   │          │
+│  │  │ ⑤板块映射  │  │ ⑤炸板统计   │  │              │  │            │   │          │
+│  │  └────────────┘  └────────────┘  └──────────────┘  └───────────┘   │          │
+│  │                                                                      │          │
+│  │  ┌────────────┐                                                      │          │
+│  │  │  启动器     │  ← 替换通达信快捷方式                                 │          │
+│  │  │ launcher   │  检测是否需要更新 → 更新 → 启动通达信                 │          │
+│  │  └────────────┘                                                      │          │
+│  └─────────────────────────┬────────────────────────────────────────────┘          │
+│                            │                                                    │
+│  ┌─────────────────────────▼────────────────────────────────────────────┐          │
+│  │  存储层                                                               │          │
+│  │                                                                      │          │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │          │
+│  │  │ data/        │  │ data/        │  │ T0002/       │               │          │
+│  │  │ latest.json  │  │ history/     │  │ blocknew/    │               │          │
+│  │  │ 今日数据      │  │ 历史趋势数据   │  │ .blk板块文件  │               │          │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘               │          │
+│  └──────────────────────────────────────────────────────────────────────┘          │
+│                                                                                    │
+└────────────────────────────────────────────────────────────────────────────────────┘</pre>
+  </div>
+
+  <h3>5.2 用户使用全流程</h3>
+  <div class="flow">
+┌────────────────────────────────────────────────────────────────────────────┐
+│                        用户使用全流程                                      │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                            │
+│  【首次使用】                                                              │
+│                                                                            │
+│   1. 下载 复牌助手_v1.0.exe  →  双击运行                                  │
+│   2. 浏览器自动打开 → 进入「安装向导」页面                                  │
+│   3. 确认通达信路径 → 勾选复盘内容 → 扫码绑微信 → 选择更新方式              │
+│   4. 点击「开始安装」→ 进度条走完 → ✅ 完成                                │
+│   5. 重启通达信 → 顶部标签栏出现复盘板块                                    │
+│                                                                            │
+│  【每天日常】                                                              │
+│                                                                            │
+│   ┌─────────────────────────────────────────────┐                        │
+│   │  情况A：电脑开着，15:30定时触发                │                        │
+│   │  → 引擎自动运行 → 更新通达信板块               │                        │
+│   │  → 微信收到复盘推送                           │                        │
+│   │  → 打开浏览器看可视化看板                      │                        │
+│   ├─────────────────────────────────────────────┤                        │
+│   │  情况B：电脑关着，第二天打开通达信              │                        │
+│   │  → 启动器检测到未更新 → 自动拉取数据            │                        │
+│   │  → 更新板块 → 启动通达信                       │                        │
+│   │  → 微信收到复盘推送                           │                        │
+│   ├─────────────────────────────────────────────┤                        │
+│   │  情况C：盘中想看复盘                           │                        │
+│   │  → 双击桌面复牌助手图标                         │                        │
+│   │  → 浏览器打开 → 看历史数据和趋势                │                        │
+│   └─────────────────────────────────────────────┘                        │
+│                                                                            │
+│  【何时看到什么】                                                          │
+│                                                                            │
+│  打开浏览器                  ─── 可视化复盘看板 (图表/排名/路线图)         │
+│  打开通达信                  ─── 自定义板块 (涨停梯队/跌停/龙虎榜)          │
+│  微信推送                    ─── 复盘摘要卡片                              │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+  </div>
+
+  <h3>5.3 数据流图</h3>
+  <div class="arch">
+<pre>┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  同花顺 dataapi  │    │  ClawHub龙虎榜   │    │  个股行情API     │
+│  涨停池/跌停池   │    │  龙虎榜数据      │    │  昨涨停今表现    │
+└────────┬────────┘    └────────┬────────┘    └────────┬────────┘
+         │                      │                      │
+         └──────────┬───────────┴──────────────────────┘
+                    │
+                    ▼
+         ┌─────────────────────┐
+         │      计算引擎        │
+         │  ┌───────────────┐  │
+         │  │ 连板天数计算    │  │
+         │  │ 连跌天数计算    │  │
+         │  │ 板块聚合统计    │  │
+         │  │ 昨今晋级率     │  │
+         │  │ 炸板统计       │  │
+         │  │ 龙虎榜排序     │  │
+         │  └───────┬───────┘  │
+         └──────────┼──────────┘
+                    │
+         ┌──────────┴──────────┐
+         │                     │
+         ▼                     ▼
+┌─────────────────┐   ┌─────────────────┐
+│  通达信板块文件   │   │  data/           │
+│  blocknew/       │   │  latest.json     │
+│  SB/2LB/ZFB...  │   │  history/        │
+└─────────────────┘   └────────┬────────┘
+                               │
+                               ▼
+                    ┌─────────────────┐
+                    │  网页看板         │
+                    │  http://localhost│
+                    │  /8765           │
+                    │  图表/表格/排名   │
+                    └─────────────────┘</pre>
+  </div>
+</div>
+
+
+<!-- ==================== 六、启动机制 ==================== -->
+<div class="section" id="s6">
+  <h2>六、启动机制</h2>
+
+  <h3>6.1 双触发机制</h3>
+
+  <div class="deliverable-row">
+    <div class="deliverable-card card-primary">
+      <div class="big-icon">⏰</div>
+      <h4>触发A：定时任务</h4>
+      <ul>
+        <li>Windows Task Scheduler</li>
+        <li>每天 15:30 自动运行引擎</li>
+        <li>电脑开着时到点就更新</li>
+        <li>无需用户操作</li>
+      </ul>
+    </div>
+    <div class="deliverable-card card-accent">
+      <div class="big-icon">🚀</div>
+      <h4>触发B：通达信启动触发</h4>
+      <ul>
+        <li>替换快捷方式 → launcher.exe</li>
+        <li>检测 last_update.json</li>
+        <li>需要更新 → 先跑引擎 → 再启动TDX</li>
+        <li>已更新 → 直接启动TDX（秒开）</li>
+      </ul>
+    </div>
+    <div class="deliverable-card card-primary">
+      <div class="big-icon">🖱️</div>
+      <h4>触发C：手动触发</h4>
+      <ul>
+        <li>网页上点击「立即更新」</li>
+        <li>系统托盘右键「立即更新」</li>
+        <li>双击桌面快捷方式打开看板</li>
+        <li>随时可手动运行</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>6.2 缓存标记</h3>
+  <div class="filetree">
+引擎通过检查 data/last_update.json 判断是否需要更新：<br><br>
+{<br>
+&nbsp;&nbsp;"lastDate": "20260529",<br>
+&nbsp;&nbsp;"lastTime": "2026-05-29 15:35:00",<br>
+&nbsp;&nbsp;"status": "success"<br>
+}<br><br>
+判断逻辑： 今天 > lastDate → 需要更新   │   今天 = lastDate → 已最新
+  </div>
+</div>
+
+
+<!-- ==================== 七、产品交付形态 ==================== -->
+<div class="section" id="s7">
+  <h2>七、产品交付形态</h2>
+
+  <h3>7.1 用户收到的唯一文件</h3>
+  <div class="arch">
+<pre>┌───────────────────────────────────────────────┐
+│         复牌助手_v1.0.exe                      │
+│                                               │
+│  内嵌：                                        │
+│  ├── HTTP 服务器 (Python http.server / Flask)  │
+│  ├── 连板龙引擎 (数据获取+计算+写板块)            │
+│  ├── 网页资源 (HTML + CSS + JS + Chart.js)    │
+│  ├── 安装模块 (写cfg+注册定时+替换快捷方式)     │
+│  ├── 启动器模块 (检测更新→启动TDX)             │
+│  └── 卸载模块                                  │
+│                                               │
+│  大小：约 10-12 MB（含 Python 运行时）          │
+└───────────────────────────────────────────────┘</pre>
+  </div>
+
+  <h3>7.2 安装后目录结构</h3>
+  <div class="filetree">
+<span class="dir">{通达信根目录}/</span>
+│
+├── <span class="dir">T0002/blocknew/</span>
+│   ├── SB.blk    <span class="comment">首板</span>
+│   ├── 2LB.blk   <span class="comment">2连板</span>
+│   ├── 3LB.blk   <span class="comment">3连板</span>
+│   ├── 4LB.blk   <span class="comment">4连板</span>
+│   ├── 5BYS.blk  <span class="comment">5板以上</span>
+│   ├── SYLB.blk  <span class="comment">所有连板</span>
+│   ├── ZFB.blk   <span class="comment">昨封板</span>
+│   ├── LHBQ20.blk<span class="comment">龙虎榜前20</span>
+│   ├── DT.blk    <span class="comment">今日跌停</span>
+│   ├── LDT.blk   <span class="comment">连跌停</span>
+│   ├── SDT.blk   <span class="comment">首跌停</span>
+│   ├── ZBQ.blk   <span class="comment">炸板股</span>
+│   ├── BKRD.blk  <span class="comment">板块热度TOP10</span>
+│   ├── ZTLJZ.blk <span class="comment">今涨停(昨涨停)</span>
+│   └── LTDP.blk  <span class="comment">今断板(昨涨停)</span>
+│
+├── blocknew.cfg               <span class="comment">板块名称定义</span>
+├── gridtab.dat                <span class="comment">标签栏配置</span>
+│
+└── <span class="dir">复牌助手/</span>
+    ├── server.exe             <span class="comment">主程序（HTTP服务器+引擎+启动器）</span>
+    ├── launcher.exe           <span class="comment">启动器（替换快捷方式）</span>
+    ├── <span class="dir">www/</span>
+    │   ├── dashboard.html     <span class="comment">博客页（所有功能在一个HTML）</span>
+    │   ├── chart.js           <span class="comment">图表库</span>
+    │   └── style.css          <span class="comment">样式</span>
+    ├── <span class="dir">data/</span>
+    │   ├── latest.json        <span class="comment">最新复盘数据</span>
+    │   ├── history/           <span class="comment">历史趋势数据</span>
+    │   └── last_update.json   <span class="comment">缓存标记</span>
+    ├── config.json            <span class="comment">用户配置</span>
+    └── <span class="dir">logs/</span>
+        └── 2026-05-29.log
+  </div>
+</div>
+
+
+<!-- ==================== 八、技术状态与开发计划 ==================== -->
+<div class="section" id="s8">
+  <h2>八、技术状态与开发计划</h2>
+
+  <h3>8.1 已完成</h3>
+  <table>
+    <tr><th style="width:220px">模块</th><th>状态</th><th>备注</th></tr>
+    <tr><td>涨停数据获取（同花顺API）</td><td><span class="tag tag-green">✅</span></td><td>5/29实盘验证49只涨停</td></tr>
+    <tr><td>龙虎榜数据获取</td><td><span class="tag tag-green">✅</span></td><td>88只数据，取前20</td></tr>
+    <tr><td>连板天数计算</td><td><span class="tag tag-green">✅</span></td><td>独立计算模式，Bug已修复</td></tr>
+    <tr><td>涨停板块分类写入（8个板块）</td><td><span class="tag tag-green">✅</span></td><td>blk文件格式正确</td></tr>
+    <tr><td>blocknew.cfg + gridtab.dat 配置写入</td><td><span class="tag tag-green">✅</span></td><td>已通过通达信验证</td></tr>
+    <tr><td>PyInstaller 打包</td><td><span class="tag tag-green">✅</span></td><td>现有 engine.exe 8MB</td></tr>
+    <tr><td>安装器（基础版）</td><td><span class="tag tag-green">✅</span></td><td>自动检测+配置+定时任务</td></tr>
+  </table>
+
+  <h3>8.2 待开发</h3>
+  <table>
+    <tr><th style="width:220px">模块</th><th>优先级</th><th>预计</th><th>说明</th></tr>
+    <tr>
+      <td><strong>HTTP 服务器（内嵌）</strong></td>
+      <td><span class="tag tag-orange">P0</span></td>
+      <td>1天</td>
+      <td>Python http.server 或 Flask，端口8765</td>
+    </tr>
+    <tr>
+      <td><strong>可视化看板 HTML</strong></td>
+      <td><span class="tag tag-orange">P0</span></td>
+      <td>2天</td>
+      <td>总览/趋势/梯队/热度/龙虎榜/路线图</td>
+    </tr>
+    <tr>
+      <td><strong>网页安装向导</strong></td>
+      <td><span class="tag tag-orange">P0</span></td>
+      <td>1天</td>
+      <td>四步引导安装界面</td>
+    </tr>
+    <tr>
+      <td><strong>网页设置面板</strong></td>
+      <td><span class="tag tag-orange">P0</span></td>
+      <td>0.5天</td>
+      <td>勾选/开关/保存到 config.json</td>
+    </tr>
+    <tr>
+      <td><strong>跌停梯队</strong></td>
+      <td><span class="tag tag-orange">P0</span></td>
+      <td>0.5天</td>
+      <td>复用涨停逻辑，改参数</td></tr>
+    <tr>
+      <td><strong>启动器 launcher.exe</strong></td>
+      <td><span class="tag tag-orange">P0</span></td>
+      <td>1天</td>
+      <td>替换快捷方式，检测更新→启动TDX</td></tr>
+    <tr>
+      <td><strong>微信推送</strong></td>
+      <td><span class="tag tag-orange">P1</span></td>
+      <td>0.5天</td>
+      <td>ServerChan 对接</td></tr>
+    <tr>
+      <td><strong>炸板监控</strong></td>
+      <td><span class="tag tag-orange">P1</span></td>
+      <td>1天</td>
+      <td>验证同花顺API字段</td></tr>
+    <tr>
+      <td><strong>板块热度统计</strong></td>
+      <td><span class="tag tag-orange">P1</span></td>
+      <td>1天</td>
+      <td>行业数据映射</td></tr>
+    <tr>
+      <td><strong>昨涨停今表现</strong></td>
+      <td><span class="tag tag-orange">P1</span></td>
+      <td>1天</td>
+      <td>个股行情API</td></tr>
+    <tr>
+      <td><strong>系统托盘</strong></td>
+      <td><span class="tag tag-orange">P2</span></td>
+      <td>0.5天</td>
+      <td>托盘常驻+右键菜单</td></tr>
+    <tr>
+      <td><strong>卸载功能</strong></td>
+      <td><span class="tag tag-orange">P2</span></td>
+      <td>0.5天</td>
+      <td>清理+恢复快捷方式</td></tr>
+    <tr>
+      <td><strong>多券商支持</strong></td>
+      <td><span class="tag tag-blue">P3</span></td>
+      <td>2天</td>
+      <td>同花顺/东财格式适配</td></tr>
+  </table>
+
+  <h3>8.3 开发路线图</h3>
+  <div class="deliverable-row">
+    <div class="deliverable-card" style="background:linear-gradient(135deg,#e94560,#c23152);color:#fff;">
+      <h4 style="color:#fff;">第1阶段：引擎补全（3-5天）</h4>
+      <ul style="color:rgba(255,255,255,.85);">
+        <li>跌停梯队（复用涨停逻辑）</li>
+        <li>炸板监控（API字段验证）</li>
+        <li>昨涨停今表现（行情API）</li>
+        <li>板块热度统计（行业映射）</li>
+        <li>微信推送（ServerChan）</li>
+      </ul>
+    </div>
+    <div class="deliverable-card" style="background:linear-gradient(135deg,#0f3460,#16213e);color:#fff;">
+      <h4 style="color:#fff;">第2阶段：网页+服务器（2-3天）</h4>
+      <ul style="color:rgba(255,255,255,.85);">
+        <li>内嵌 HTTP 服务器</li>
+        <li>可视化看板 HTML</li>
+        <li>安装向导/设置面板</li>
+        <li>API 接口对接</li>
+      </ul>
+    </div>
+    <div class="deliverable-card" style="background:linear-gradient(135deg,#1a1a2e,#2d2d44);color:#fff;">
+      <h4 style="color:#fff;">第3阶段：整合打包（2-3天）</h4>
+      <ul style="color:rgba(255,255,255,.85);">
+        <li>启动器 launcher.exe</li>
+        <li>系统托盘</li>
+        <li>PyInstaller 整合打包</li>
+        <li>综合测试+文档</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="ok">
+    <strong>预估总工期：</strong>7-11 天完成 V1.0 全部功能交付。
+  </div>
+</div>
+
+
+<!-- ==================== 九、竞品差异 ==================== -->
+<div class="section" id="s9">
+  <h2>九、竞品差异分析</h2>
+
+  <table>
+    <tr><th style="width:140px">比较维度</th><th style="width:240px">市面同类工具</th><th style="width:240px">本产品</th><th>优势</th></tr>
+    <tr><td>交付形态</td><td>分散的脚本/手动配置</td><td><strong>一个exe，全都有</strong></td><td>零门槛</td></tr>
+    <tr><td>安装方式</td><td>手动配置板块、手动导入数据</td><td><strong>浏览器里一键安装</strong></td><td>极简</td></tr>
+    <tr><td>更新方式</td><td>每天手动运行</td><td><strong>双触发：定时+打开软件自动</strong></td><td>省心</td></tr>
+    <tr><td>复盘覆盖</td><td>仅涨停列表</td><td><strong>涨停+跌停+炸板+板块热度+龙虎榜+昨涨停今表现</strong></td><td>全面</td></tr>
+    <tr><td>可视化</td><td>无</td><td><strong>网页看板：图表/趋势/路线图/热力图</strong></td><td>直观</td></tr>
+    <tr><td>手机推送</td><td>无</td><td><strong>微信推送复盘摘要</strong></td><td>随时看</td></tr>
+    <tr><td>数据呈现</td><td>分开在不同软件/网页</td><td><strong>通达信板块+网页看板+微信 三端统一</strong></td><td>不遗漏</td></tr>
+    <tr><td>配置灵活度</td><td>固定不可调</td><td><strong>网页上勾选开关，所见即所得</strong></td><td>个性化</td></tr>
+    <tr><td>卸载</td><td>手动删除</td><td><strong>一键卸载</strong></td><td>完整</td></tr>
+  </table>
+</div>
+
+
+<!-- ==================== 十、附录 ==================== -->
+<div class="section" id="s10">
+  <h2>十、附录</h2>
+
+  <h3>10.1 项目文件清单</h3>
+  <div class="filetree">
+<span class="dir">E:\AI股票复盘自动化项目\</span>
+├── <span class="dir">core\</span>
+│   ├── tdx_zt_update.py     <span class="comment">Python核心引擎（主维护）</span>
+│   ├── tdx_zt_update.js     <span class="comment">Node.js版（备选）</span>
+│   ├── install.py            <span class="comment">基础安装脚本</span>
+│   └── run_test.bat          <span class="comment">手动运行批处理</span>
+├── <span class="dir">dist\</span>
+│   ├── tdx_zt_update.exe    <span class="comment">已打包引擎 (8MB)</span>
+│   └── install.exe           <span class="comment">已打包安装器 (7MB)</span>
+├── <span class="dir">docs\</span>
+│   └── 产品策划书_通达信自动复盘工具.html  <span class="comment">← 本文档</span>
+├── <span class="dir">memory\</span>
+│   ├── 2026-05-31.md         <span class="comment">连板修复+实盘验证</span>
+│   ├── 2026-05-27.md         <span class="comment">竞品采集</span>
+│   └── 2026-04-07.md         <span class="comment">历史记录</span>
+└── <span class="dir">spec\</span>
+    ├── tdx_zt_update.spec
+    └── install.spec
+  </div>
+
+  <h3>10.2 API 清单</h3>
+  <table>
+    <tr><th>API</th><th>地址</th><th>备注</th></tr>
+    <tr><td>同花顺涨停池</td><td><code>https://data.10jqka.com.cn/dataapi/limit_up/limit_up_pool?date={date}</code></td><td>需 Referer</td></tr>
+    <tr><td>龙虎榜</td><td><code>http://fffy520.gicp.net:8003/api/lhb/daily?date={date}</code></td><td>自建服务</td></tr>
+    <tr><td>微信推送</td><td><code>https://sctapi.ftqq.com/{SendKey}.send</code></td><td>ServerChan</td></tr>
+  </table>
+
+  <h3>10.3 本地 API（网页↔引擎）</h3>
+  <table>
+    <tr><th>接口</th><th>方法</th><th>说明</th></tr>
+    <tr><td><code>/api/status</code></td><td>GET</td><td>引擎状态、上次更新时间</td></tr>
+    <tr><td><code>/api/dashboard</code></td><td>GET</td><td>今日复盘数据（latest.json）</td></tr>
+    <tr><td><code>/api/config</code></td><td>GET/POST</td><td>读取/保存配置</td></tr>
+    <tr><td><code>/api/install</code></td><td>POST</td><td>执行安装流程</td></tr>
+    <tr><td><code>/api/update</code></td><td>POST</td><td>手动触发数据更新</td></tr>
+    <tr><td><code>/api/history</code></td><td>GET</td><td>历史趋势数据</td></tr>
+    <tr><td><code>/api/uninstall</code></td><td>POST</td><td>卸载</td></tr>
+  </table>
+
+  <h3>10.4 板块文件总表</h3>
+  <table>
+    <tr><th>文件</th><th>名称</th><th>分类</th><th>状态</th></tr>
+    <tr><td><code>SB.blk</code></td><td>首板</td><td rowspan="6">涨停梯队</td><td><span class="tag tag-green">✅ 已有</span></td></tr>
+    <tr><td><code>2LB.blk</code></td><td>2连板</td><td><span class="tag tag-green">✅ 已有</span></td></tr>
+    <tr><td><code>3LB.blk</code></td><td>3连板</td><td><span class="tag tag-green">✅ 已有</span></td></tr>
+    <tr><td><code>4LB.blk</code></td><td>4连板</td><td><span class="tag tag-green">✅ 已有</span></td></tr>
+    <tr><td><code>5BYS.blk</code></td><td>5板以上</td><td><span class="tag tag-green">✅ 已有</span></td></tr>
+    <tr><td><code>SYLB.blk</code></td><td>所有连板</td><td><span class="tag tag-green">✅ 已有</span></td></tr>
+    <tr><td><code>ZFB.blk</code></td><td>昨封板</td><td>涨停汇总</td><td><span class="tag tag-green">✅ 已有</span></td></tr>
+    <tr><td><code>LHBQ20.blk</code></td><td>龙虎榜前20</td><td>资金</td><td><span class="tag tag-green">✅ 已有</span></td></tr>
+    <tr><td><code>DT.blk</code></td><td>今日跌停</td><td rowspan="3">跌停</td><td><span class="tag tag-red">🆕</span></td></tr>
+    <tr><td><code>LDT.blk</code></td><td>连跌停</td><td><span class="tag tag-red">🆕</span></td></tr>
+    <tr><td><code>SDT.blk</code></td><td>首跌停</td><td><span class="tag tag-red">🆕</span></td></tr>
+    <tr><td><code>ZBQ.blk</code></td><td>炸板股</td><td>炸板</td><td><span class="tag tag-red">🆕</span></td></tr>
+    <tr><td><code>BKRD.blk</code></td><td>板块热度TOP10</td><td>热度</td><td><span class="tag tag-red">🆕</span></td></tr>
+    <tr><td><code>ZTLJZ.blk</code></td><td>今涨停(昨涨停)</td><td rowspan="3">昨今对比</td><td><span class="tag tag-red">🆕</span></td></tr>
+    <tr><td><code>ZTDP.blk</code></td><td>今断板(昨涨停)</td><td><span class="tag tag-red">🆕</span></td></tr>
+    <tr><td><code>ZTDM.blk</code></td><td>今跌停(昨涨停)</td><td><span class="tag tag-red">🆕</span></td></tr>
+  </table>
+</div>
+
+
+<!-- ======================== 页脚 ======================== -->
+<div style="text-align:center; color:#999; font-size:13px; margin-top:40px; padding:20px; border-top:1px solid #e0e0e0;">
+  通达信自动复盘工具 · 产品策划书 V3.0（网页+引擎最终方案）<br>
+  📅 2026-05-31 &nbsp;|&nbsp; 用户下载一个 exe，所有交互在浏览器里完成
+</div>
+
+</div><!-- /container -->
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "name": "复盘助手",
+  "platform": "eastmoney",
+  "platformName": "东方财富",
+  "date": "2026-06-02",
+  "status": "baseline",
+  "note": "东方财富独立版 - 基于V4框架适配"
+}

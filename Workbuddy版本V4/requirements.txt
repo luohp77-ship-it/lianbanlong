@@ -1,0 +1,13 @@
+# 连板龙 V4 依赖
+# 核心依赖（Python 标准库，无需安装）
+# - os, sys, json, ssl, time, struct, shutil, urllib.request
+# - datetime, pathlib, collections, concurrent.futures, functools
+# - tkinter (Python自带GUI库)
+
+# 必需依赖
+python-docx>=0.8.11   # Word报告生成
+psutil>=5.9.0         # 进程检测
+cryptography>=41.0.0  # RSA签名验证（license.py）
+
+# 可选依赖
+# PyInstaller>=5.0     # 打包为exe时需要

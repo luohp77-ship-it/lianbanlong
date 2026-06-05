@@ -1,0 +1,9 @@
+{
+  "name": "fupan-user-center",
+  "version": "1.0.0",
+  "description": "复盘助手用户中心",
+  "scripts": {
+    "dev": "npx serve .",
+    "start": "npx serve ."
+  }
+}

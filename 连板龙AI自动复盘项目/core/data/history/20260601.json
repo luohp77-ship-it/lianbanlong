@@ -1,0 +1,20 @@
+{
+  "date": "20260601",
+  "limitUp": 140,
+  "limitDown": 11,
+  "maxBoard": 4,
+  "concepts": [
+    {
+      "name": "消费电子",
+      "count": 9
+    },
+    {
+      "name": "煤炭",
+      "count": 9
+    },
+    {
+      "name": "电力设备",
+      "count": 4
+    }
+  ]
+}

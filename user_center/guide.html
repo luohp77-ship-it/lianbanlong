@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>使用说明 — 复盘助手</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <span class="logo">复盘助手</span>
+    <div class="nav-links">
+      <a href="/">首页</a>
+      <a href="/download">下载</a>
+      <a href="/activate">激活</a>
+      <a href="/guide" class="active">使用说明</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <section class="page-section">
+    <h1>使用说明</h1>
+
+    <div class="guide-section">
+      <h2>📦 安装</h2>
+      <ol>
+        <li>下载复盘助手 exe 文件</li>
+        <li>双击运行，程序自动查找本机通达信路径</li>
+        <li>如未自动找到，请输入通达信安装目录（如 C:\new_tdx）</li>
+        <li>安装完成后，桌面会出现「复盘助手」快捷方式</li>
+        <li>重启通达信，在板块列表中右键 → 刷新即可看到自定义板块</li>
+      </ol>
+      <div class="tip">提示：如果通达信正在运行，安装后需要重启才能看到新板块。</div>
+    </div>
+
+    <div class="guide-section">
+      <h2>🔑 激活</h2>
+      <ol>
+        <li>在淘宝购买后，你会收到激活码</li>
+        <li>打开复盘助手，点击「激活」按钮</li>
+        <li>粘贴激活码，点击确认</li>
+        <li>激活成功后，顶部会显示「正式·剩余XXX天」</li>
+      </ol>
+      <div class="tip">首次使用无需激活码，自动获得 30 天试用。</div>
+    </div>
+
+    <div class="guide-section">
+      <h2>📋 每日使用</h2>
+      <ol>
+        <li>每天 18:00 系统自动更新数据（定时任务）</li>
+        <li>打开通达信，在自定义板块中查看涨停梯队、龙虎榜、概念热点</li>
+        <li>Word 复盘报告保存在 reports/ 目录下</li>
+        <li>如需手动更新，双击桌面快捷方式 → 点击「立即更新」</li>
+      </ol>
+    </div>
+
+    <div class="guide-section">
+      <h2>📱 微信推送</h2>
+      <ol>
+        <li>打开复盘助手 → 设置</li>
+        <li>点击「绑定微信」，扫码完成绑定</li>
+        <li>每天 18:00 更新完成后，微信自动收到推送</li>
+      </ol>
+      <div class="tip">推送内容包含：涨停数、连板数、最高板、龙虎榜等关键数据。</div>
+    </div>
+
+    <div class="guide-section">
+      <h2>🔄 换电脑 / 重装</h2>
+      <ol>
+        <li>在旧电脑上打开复盘助手 → 设置 → 解绑本设备</li>
+        <li>在新电脑上下载安装复盘助手</li>
+        <li>用同一个激活码重新激活</li>
+      </ol>
+    </div>
+
+    <div class="guide-section">
+      <h2>❌ 卸载</h2>
+      <ol>
+        <li>双击复盘助手快捷方式</li>
+        <li>在软件目录中运行 <code>python install.py --uninstall</code></li>
+        <li>或手动删除安装目录（默认 %LOCALAPPDATA%\复盘助手\）</li>
+      </ol>
+    </div>
+
+    <div class="guide-section">
+      <h2>⚠️ 常见问题</h2>
+      <dl>
+        <dt>Q: 通达信里看不到板块？</dt>
+        <dd>A: 先确认已运行「安装板块」功能，然后重启通达信。</dd>
+        <dt>Q: 自定义数据列没有数据？</dt>
+        <dd>A: 行情列表表头右键 → 选择自定义数据 → 勾选数据号1/2/3。</dd>
+        <dt>Q: 杀软报毒？</dt>
+        <dd>A: 添加到杀软信任区。PyInstaller 打包的工具常被误报。</dd>
+        <dt>Q: 定时任务没运行？</dt>
+        <dd>A: 打开「任务计划程序」，检查「复盘助手_数据更新」是否存在。</dd>
+      </dl>
+    </div>
+
+  </section>
+</main>
+
+<footer class="footer">
+  <p>复盘助手 — 通达信自动复盘工具</p>
+  <p class="disclaimer">本软件为数据整理工具，不构成投资建议。股市有风险，投资需谨慎。</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "version": "3.1.0",
+  "date": "2026-06-03",
+  "changes": [
+    "[安全] SSL验证恢复为按需关闭（HTTPS默认验证证书，HTTP自动跳过）",
+    "[修复] blocknewDir 从 tdxDir 自动推导，防止路径不一致",
+    "[修复] blocknew.cfg / blocknew.clr / LastSync 改用 .tmp + os.replace 原子写入",
+    "[修复] Word报告生成状态在总结行显示（报告:OK/失败）",
+    "[加密] 新增 Cython 编译脚本（核心引擎→.pyd，汇编级保护）",
+    "[加密] 新增 PyArmor 混淆+PyiInstaller 三层加密打包脚本",
+    "V3.0.0 QA审核修复全部保留"
+  ]
+}

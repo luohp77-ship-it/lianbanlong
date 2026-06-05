@@ -1,0 +1,8 @@
+# 复盘助手 V5 依赖
+# 核心依赖（标准库优先，无需额外安装）
+# - os, sys, json, ssl, time, struct, shutil, urllib.request
+# - datetime, pathlib, collections, concurrent.futures
+# - tkinter (Python自带GUI库)
+
+# 可选依赖
+# PyInstaller>=5.0  # 打包为exe时需要

@@ -1,0 +1,13 @@
+{
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "devCommand": null,
+  "framework": null,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/buy", "destination": "/buy.html" },
+    { "source": "/activate", "destination": "/activate.html" },
+    { "source": "/guide", "destination": "/guide.html" },
+    { "source": "/manage", "destination": "/manage.html" }
+  ]
+}

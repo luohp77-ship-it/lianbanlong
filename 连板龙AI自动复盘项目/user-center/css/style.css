@@ -1,0 +1,141 @@
+/* 复盘助手 V4 用户中心 — 样式 */
+:root {
+  --bg: #f0f2f5;
+  --card: #ffffff;
+  --primary: #e94560;
+  --secondary: #1a1a2e;
+  --accent: #238636;
+  --text: #333333;
+  --muted: #8b949e;
+  --border: #e0e0e0;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+/* 顶部导航 */
+.header {
+  background: var(--secondary);
+  padding: 16px 0;
+  position: sticky; top: 0; z-index: 100;
+}
+.header .container {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.header .logo { color: var(--primary); font-size: 20px; font-weight: bold; }
+.header .nav a {
+  color: #ccc; text-decoration: none; margin-left: 24px; font-size: 14px;
+}
+.header .nav a:hover { color: #fff; }
+
+/* 主内容 */
+.main { padding: 40px 0; }
+.card {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+.card h2 { font-size: 22px; margin-bottom: 16px; }
+.card h3 { font-size: 17px; margin: 20px 0 10px; }
+.card p { color: #555; margin-bottom: 12px; font-size: 15px; }
+
+/* 按钮 */
+.btn {
+  display: inline-block;
+  padding: 12px 32px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.85; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+
+/* 输入框 */
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input:focus { border-color: var(--primary); }
+
+/* 价格卡片 */
+.pricing { display: flex; gap: 24px; margin: 24px 0; }
+.pricing .plan {
+  flex: 1;
+  background: var(--card);
+  border-radius: 8px;
+  padding: 32px 24px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  border: 2px solid transparent;
+}
+.pricing .plan.featured { border-color: var(--primary); }
+.pricing .plan .price { font-size: 36px; font-weight: bold; color: var(--primary); margin: 12px 0; }
+.pricing .plan .price span { font-size: 16px; color: var(--muted); }
+.pricing .plan ul { list-style: none; text-align: left; margin: 16px 0; }
+.pricing .plan ul li { padding: 6px 0; font-size: 14px; color: #555; }
+.pricing .plan ul li::before { content: "✓ "; color: var(--accent); font-weight: bold; }
+
+/* 二维码 */
+.qrcode-wrap { text-align: center; padding: 24px; }
+.qrcode-wrap img { width: 240px; height: 240px; border: 2px solid var(--border); border-radius: 8px; }
+.qrcode-wrap p { margin-top: 12px; color: #888; font-size: 14px; }
+
+/* 步骤 */
+.steps { counter-reset: step; margin: 20px 0; }
+.steps .step {
+  counter-increment: step;
+  padding: 16px 16px 16px 48px;
+  position: relative;
+  border-left: 3px solid var(--primary);
+  margin-bottom: 16px;
+}
+.steps .step::before {
+  content: counter(step);
+  position: absolute; left: -14px; top: 14px;
+  width: 28px; height: 28px;
+  background: var(--primary); color: #fff;
+  border-radius: 50%;
+  text-align: center; line-height: 28px;
+  font-size: 14px; font-weight: bold;
+}
+
+/* 页脚 */
+.footer { text-align: center; padding: 24px 0; color: var(--muted); font-size: 13px; }
+.footer a { color: var(--muted); }
+
+/* 状态徽标 */
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+}
+.badge-success { background: #d4edda; color: #155724; }
+.badge-warning { background: #fff3cd; color: #856404; }
+.badge-danger { background: #f8d7da; color: #721c24; }
+
+/* 响应式 */
+@media (max-width: 640px) {
+  .pricing { flex-direction: column; }
+  .header .nav a { margin-left: 12px; font-size: 13px; }
+}

@@ -1,0 +1,120 @@
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #1a1a2e; background: #f5f6f8; line-height: 1.6;
+}
+
+/* ── Nav ── */
+.nav { background: #1a1a2e; position: sticky; top: 0; z-index: 100; }
+.nav-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; height: 52px; }
+.logo { color: #e94560; font-size: 1.2rem; font-weight: 700; }
+.nav-links { display: flex; gap: 8px; }
+.nav-links a { color: #8b949e; text-decoration: none; font-size: 0.9rem; padding: 6px 14px; border-radius: 4px; transition: all 0.2s; }
+.nav-links a:hover, .nav-links a.active { color: #fff; background: rgba(255,255,255,0.08); }
+
+/* ── Hero ── */
+.hero { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; padding: 80px 20px; text-align: center; }
+.hero-content { max-width: 700px; margin: 0 auto; }
+.hero h1 { font-size: 2.5rem; margin-bottom: 12px; }
+.subtitle { font-size: 1.15rem; color: #e94560; margin-bottom: 8px; }
+.desc { font-size: 0.95rem; color: #8b949e; margin-bottom: 28px; }
+.hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ── Buttons ── */
+.btn { display: inline-block; padding: 12px 28px; border-radius: 6px; font-size: 1rem; font-weight: 600; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; }
+.btn-primary { background: #238636; color: #fff; }
+.btn-primary:hover { background: #2ea043; }
+.btn-outline { background: transparent; color: #fff; border: 1.5px solid #8b949e; }
+.btn-outline:hover { border-color: #e94560; color: #e94560; }
+.btn-lg { padding: 14px 36px; font-size: 1.1rem; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Sections ── */
+section { padding: 60px 20px; }
+.page-section { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+.page-section h1 { font-size: 2rem; margin-bottom: 28px; color: #1a1a2e; }
+h2 { font-size: 1.4rem; margin-bottom: 20px; text-align: center; color: #1a1a2e; }
+
+/* ── Features ── */
+.features { background: #fff; }
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto; padding: 0 20px; }
+.feature-card { background: #f5f6f8; border-radius: 10px; padding: 24px; text-align: center; }
+.feature-icon { font-size: 2.2rem; margin-bottom: 10px; }
+.feature-card h3 { font-size: 1.05rem; margin-bottom: 8px; }
+.feature-card p { font-size: 0.88rem; color: #555; }
+
+/* ── Pricing ── */
+.pricing { background: #fff; }
+.price-cards { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; max-width: 700px; margin: 0 auto; }
+.price-card { flex: 1; min-width: 260px; max-width: 320px; background: #f5f6f8; border-radius: 12px; padding: 28px 24px; text-align: center; position: relative; border: 2px solid transparent; }
+.price-card.highlight { border-color: #238636; }
+.price-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #666; color: #fff; padding: 3px 14px; border-radius: 10px; font-size: 0.8rem; }
+.price-badge.hot { background: #238636; }
+.price { font-size: 2rem; font-weight: 700; color: #1a1a2e; margin: 12px 0; }
+.price small { font-size: 1rem; font-weight: 400; color: #666; }
+.price-card ul { list-style: none; padding: 0; margin: 16px 0; }
+.price-card li { padding: 6px 0; font-size: 0.9rem; color: #444; border-bottom: 1px solid #e5e7eb; }
+.price-card li:last-child { border: none; }
+.buy-tip { font-size: 0.82rem; color: #888; margin-top: 8px; }
+
+/* ── FAQ ── */
+.faq { background: #fff; max-width: 700px; margin: 0 auto; padding: 40px 20px; }
+.faq-list details { margin-bottom: 10px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+.faq-list summary { padding: 14px 18px; cursor: pointer; font-weight: 600; font-size: 0.95rem; background: #f9fafb; }
+.faq-list details[open] summary { background: #f0f2f5; }
+.faq-list details p { padding: 14px 18px; font-size: 0.9rem; color: #444; }
+
+/* ── Download ── */
+.download-card { background: #fff; border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb; }
+.download-info { text-align: center; }
+.download-info h2 { margin-bottom: 6px; }
+.version-info { font-size: 0.85rem; color: #888; margin-bottom: 20px; }
+.changelog { list-style: none; padding: 0; margin: 0 auto 24px; max-width: 400px; text-align: left; display: inline-block; }
+.changelog li { padding: 4px 0; font-size: 0.9rem; color: #333; }
+.download-btn-wrap { margin: 24px 0 12px; }
+.download-note { font-size: 0.82rem; color: #888; margin-top: 6px; }
+
+/* ── Activate ── */
+.activate-container { display: flex; flex-direction: column; gap: 20px; }
+.card { background: #fff; border-radius: 12px; padding: 28px; border: 1px solid #e5e7eb; }
+.card h2 { text-align: left; margin-bottom: 10px; }
+.card p { font-size: 0.9rem; color: #555; margin-bottom: 16px; }
+.code-input { width: 100%; padding: 12px 16px; font-size: 1rem; font-family: monospace; border: 2px solid #ddd; border-radius: 8px; outline: none; transition: border-color 0.2s; }
+.code-input:focus { border-color: #238636; }
+.hint { font-size: 0.82rem; color: #888; margin-top: 6px; }
+.note { font-size: 0.82rem; color: #888; margin-top: 16px; font-style: italic; }
+.result-msg { padding: 10px 14px; border-radius: 6px; margin: 12px 0; font-size: 0.9rem; }
+.result-msg.success { background: #d3f0df; color: #1a6b3c; }
+.result-msg.error { background: #fde8e8; color: #c53030; }
+
+/* ── Device List ── */
+.device-list { margin: 12px 0; }
+.device-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+.device-date { color: #888; font-size: 0.82rem; }
+
+/* ── Subscription ── */
+.sub-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+
+/* ── Guide ── */
+.guide-section { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px; border: 1px solid #e5e7eb; }
+.guide-section h2 { text-align: left; margin-bottom: 14px; }
+.guide-section ol { padding-left: 20px; }
+.guide-section li { margin-bottom: 6px; font-size: 0.92rem; color: #333; }
+.tip { background: #fefce8; border: 1px solid #fde68a; border-radius: 6px; padding: 10px 14px; margin-top: 12px; font-size: 0.85rem; color: #92400e; }
+dl dt { font-weight: 600; margin-top: 14px; margin-bottom: 4px; font-size: 0.92rem; }
+dl dd { padding-left: 20px; font-size: 0.88rem; color: #555; margin-bottom: 8px; }
+
+/* ── Footer ── */
+.footer { background: #1a1a2e; color: #8b949e; text-align: center; padding: 32px 20px; font-size: 0.85rem; }
+.footer .disclaimer { font-size: 0.78rem; margin-top: 8px; color: #666; }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .hero h1 { font-size: 1.8rem; }
+  .hero { padding: 50px 16px; }
+  .nav-links a { font-size: 0.82rem; padding: 5px 10px; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .price-cards { flex-direction: column; align-items: center; }
+}

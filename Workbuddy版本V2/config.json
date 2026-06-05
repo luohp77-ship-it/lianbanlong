@@ -1,0 +1,8 @@
+{
+  "tdxDir": "C:\\new_tdx",
+  "blocknewDir": "C:\\new_tdx\\T0002\\blocknew",
+  "enableWechat": false,
+  "wechatKey": "",
+  "enableTgBot": false,
+  "tgBotToken": ""
+}

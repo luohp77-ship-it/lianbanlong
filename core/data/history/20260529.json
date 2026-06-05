@@ -1,0 +1,16 @@
+{
+  "date": "20260529",
+  "limitUp": 49,
+  "limitDown": 8,
+  "maxBoard": 1,
+  "concepts": [
+    {
+      "name": "大消费",
+      "count": 9
+    },
+    {
+      "name": "电力改革",
+      "count": 8
+    }
+  ]
+}

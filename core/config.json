@@ -1,0 +1,8 @@
+{
+  "tdxDir": "c:\\new_tdx\\",
+  "blocknewDir": "c:\\new_tdx\\T0002\\blocknew",
+  "enableWechat": false,
+  "wechatKey": "",
+  "platform": "eastmoney",
+  "eastmoneyDir": "E:/东方财富/dfcf"
+}

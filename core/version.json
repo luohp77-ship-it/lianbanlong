@@ -1,0 +1,9 @@
+{
+  "version": "4.1.0-dev",
+  "name": "复盘助手",
+  "platform": "tdx",
+  "platformName": "通达信",
+  "date": "2026-06-02",
+  "status": "development",
+  "supportedPlatforms": ["tdx", "eastmoney"]
+}

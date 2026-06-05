@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>激活管理 — 复盘助手</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <span class="logo">复盘助手</span>
+    <div class="nav-links">
+      <a href="/">首页</a>
+      <a href="/download">下载</a>
+      <a href="/activate" class="active">激活</a>
+      <a href="/guide">使用说明</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <section class="page-section">
+    <h1>激活管理</h1>
+
+    <div class="activate-container">
+      <!-- 激活表单 -->
+      <div class="card" id="activate-form">
+        <h2>输入激活码</h2>
+        <p>在淘宝购买后，你会收到一个激活码。粘贴到下方即可激活。</p>
+        <form onsubmit="return handleActivate(event)">
+          <input type="text" id="code-input" placeholder="LICENSE-XXXX-XXXX-XXXX-XXXX" 
+                 pattern="LICENSE-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}"
+                 class="code-input" required>
+          <p class="hint">格式: LICENSE-XXXX-XXXX-XXXX-XXXX</p>
+          <div id="activate-result" class="result-msg" style="display:none"></div>
+          <button type="submit" class="btn btn-primary">验证激活码</button>
+        </form>
+        <p class="note">首次试用用户无需激活码，安装软件后自动获得 30 天试用。</p>
+        <p class="note" style="margin-top:6px">
+          <a href="#" onclick="return getTrialCode()" style="color:#238636;text-decoration:underline;cursor:pointer;">
+            点此获取 9.9 元试用激活码 →
+          </a>
+        </p>
+      </div>
+
+      <!-- 设备管理面板（激活后显示） -->
+      <div class="card" id="device-panel" style="display:none">
+        <h2>设备管理</h2>
+        <p>当前激活码可绑定 <strong>2</strong> 台设备</p>
+        <div id="device-list" class="device-list"></div>
+        <p class="hint" style="margin-top:12px">如需更换设备，请在旧设备的软件中点击「设置 → 解绑本设备」</p>
+      </div>
+
+      <!-- 订阅信息 -->
+      <div class="card" id="subscription-info" style="display:none">
+        <h2>订阅信息</h2>
+        <div id="sub-details"></div>
+        <p class="hint">续费请前往淘宝店铺重新购买。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>复盘助手 — 通达信自动复盘工具</p>
+  <p class="disclaimer">本软件为数据整理工具，不构成投资建议。股市有风险，投资需谨慎。</p>
+</footer>
+
+<script>
+// localStorage-based 模拟（V1：无后端，数据存在用户浏览器本地）
+// 后续对接正式后端后替换为 API 调用
+
+function generateTrialCode() {
+  // 生成格式正确的试用激活码（演示用）
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let rand = '';
+  for (let i = 0; i < 16; i++) rand += chars[Math.floor(Math.random() * chars.length)];
+  const code = 'LICENSE-' + rand.slice(0,4) + '-' + rand.slice(4,8) + '-' + rand.slice(8,12) + '-' + rand.slice(12,16);
+  return code;
+}
+
+function getTrialCode() {
+  const code = generateTrialCode();
+  document.getElementById('code-input').value = code;
+  document.getElementById('code-input').focus();
+  // 帮用户自动填入，但不自动激活（让用户自己看清激活码）
+  const resultEl = document.getElementById('activate-result');
+  resultEl.style.display = 'block';
+  resultEl.className = 'result-msg success';
+  resultEl.textContent = '试用激活码已生成，点击上方「验证激活码」激活（30天试用）';
+  return false;
+}
+
+function handleActivate(e) {
+  e.preventDefault();
+  const code = document.getElementById('code-input').value.trim();
+  const resultEl = document.getElementById('activate-result');
+  
+  // 简单格式验证
+  if (!/^LICENSE-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
+    resultEl.style.display = 'block';
+    resultEl.className = 'result-msg error';
+    resultEl.textContent = '激活码格式不正确';
+    return false;
+  }
+
+  // 存到 localStorage（模拟激活成功）
+  const licenseData = {
+    code: code,
+    activated_at: new Date().toISOString().split('T')[0],
+    expires_at: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0],
+    max_devices: 2,
+    devices: [{ name: navigator.userAgent.match(/Windows NT \\d+/)?.[0] || '当前设备', bound_at: new Date().toISOString().split('T')[0] }]
+  };
+  localStorage.setItem('fupan_license', JSON.stringify(licenseData));
+  
+  resultEl.style.display = 'block';
+  resultEl.className = 'result-msg success';
+  resultEl.textContent = '激活码有效！到期日: ' + licenseData.expires_at;
+  
+  showDevicePanel(licenseData);
+  showSubscription(licenseData);
+}
+
+function showDevicePanel(data) {
+  document.getElementById('activate-form').style.display = 'none';
+  document.getElementById('device-panel').style.display = 'block';
+  document.getElementById('subscription-info').style.display = 'block';
+  
+  const list = document.getElementById('device-list');
+  list.innerHTML = data.devices.map(d => 
+    '<div class="device-item">' +
+      '<span class="device-name">' + d.name + '</span>' +
+      '<span class="device-date">绑定: ' + d.bound_at + '</span>' +
+    '</div>'
+  ).join('');
+}
+
+function showSubscription(data) {
+  document.getElementById('sub-details').innerHTML = 
+    '<div class="sub-row"><span>到期日</span><span>' + data.expires_at + '</span></div>' +
+    '<div class="sub-row"><span>剩余天数</span><span>' + Math.ceil((new Date(data.expires_at) - new Date()) / (24*60*60*1000)) + ' 天</span></div>';
+}
+
+// 页面加载时检查是否已有激活记录
+window.onload = function() {
+  const saved = localStorage.getItem('fupan_license');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      showDevicePanel(data);
+      showSubscription(data);
+    } catch(e) {}
+  }
+};
+</script>
+
+</body>
+</html>

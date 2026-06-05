@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.spec
+build/
+dist/
+*.egg-info/
+
+# Environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Project specific
+*.tmp
+*.log
+data/license.dat
+logs/
+__pycache__/
+
+# Large files (exe can be downloaded from GitHub Releases)
+*.exe
+*.zip
+*.7z
+*.rar
