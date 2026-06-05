@@ -41,6 +41,7 @@ from utils import (
     set_tdx_dir, read_tdx_daily, calc_board_days_tdx, is_limit_up, is_limit_down,
     write_extern_user, set_column_green,
     calc_period_gain, set_code_name_map,
+    detect_tdx_path, check_day_writedisk,
     DATA_DIR
 )
 from concept_analyzer import analyze_concepts_by_reason, get_top3_with_overlap, load_concept_map
@@ -571,9 +572,29 @@ def run_engine(config=None, callback=None):
     if config is None:
         config = load_config()
 
+    # ── 自动检测 TDX 路径（如果配置路径不存在） ──
     tdx_dir = config.get('tdxDir', 'C:\\new_tdx')
-    blocknew_dir = os.path.join(tdx_dir, 'T0002', 'blocknew')  # 从 tdxDir 自动推导
-    os.makedirs(blocknew_dir, exist_ok=True)
+    if not os.path.isdir(tdx_dir):
+        log('  [WARN] 配置的TDX路径不存在: %s，尝试自动检测...' % tdx_dir, level='WARN')
+        detected = detect_tdx_path()
+        if detected:
+            log('  [OK] 自动检测到TDX路径: %s' % detected)
+            config['tdxDir'] = detected
+            config['blocknewDir'] = os.path.join(detected, 'T0002', 'blocknew')
+            save_config(config)
+            tdx_dir = detected
+        else:
+            log('  [ERROR] 未检测到TDX安装，请手动设置通达信路径', level='ERROR')
+
+    # ── 检查 Day_WriteDisk 并修复 ──
+    if tdx_dir and os.path.isdir(tdx_dir):
+        if check_day_writedisk(tdx_dir):
+            log('  [OK] Day_WriteDisk 已从0修复为1，日线数据将正常写入磁盘')
+        # 确保 blocknew 目录存在
+        blocknew_dir = os.path.join(tdx_dir, 'T0002', 'blocknew')
+        os.makedirs(blocknew_dir, exist_ok=True)
+    else:
+        blocknew_dir = ''
     os.makedirs(DATA_DIR / 'boards', exist_ok=True)
     os.makedirs(DATA_DIR / 'history', exist_ok=True)
 
@@ -1421,7 +1442,20 @@ def install_blocks(config=None, callback=None, concept_names=None, counts=None):
     if config is None:
         config = load_config()
 
+    # ── 自动检测 TDX 路径（如果配置路径不存在） ──
     tdx_dir = config.get('tdxDir', 'C:\\new_tdx')
+    if not os.path.isdir(tdx_dir):
+        log('  [WARN] 配置的TDX路径不存在: %s，尝试自动检测...' % tdx_dir, level='WARN')
+        detected = detect_tdx_path()
+        if detected:
+            log('  [OK] 自动检测到TDX路径: %s' % detected)
+            config['tdxDir'] = detected
+            config['blocknewDir'] = os.path.join(detected, 'T0002', 'blocknew')
+            save_config(config)
+            tdx_dir = detected
+        else:
+            log('  [ERROR] 未检测到TDX安装，请手动设置通达信路径', level='ERROR')
+
     blocknew_dir = os.path.join(tdx_dir, 'T0002', 'blocknew')
     os.makedirs(blocknew_dir, exist_ok=True)
 

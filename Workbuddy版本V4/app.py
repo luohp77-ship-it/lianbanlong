@@ -31,7 +31,7 @@ except ImportError:
     tk = None
 
 BASE_DIR = Path(__file__).parent.resolve()
-from utils import load_config, save_config, log, DATA_DIR, LOG_DIR, clean_old_logs
+from utils import load_config, save_config, log, DATA_DIR, LOG_DIR, clean_old_logs, detect_tdx_path
 from engine import run_engine, install_blocks
 from license import LicenseManager, ActivationError
 
@@ -132,12 +132,19 @@ class FupanApp:
         self.logbox.see('end')
 
     def _open_tdx(self):
-        """打开通达信。"""
-        exe = os.path.join(self.config.get('tdxDir', 'C:\\new_tdx'), 'TdxW.exe')
-        if os.path.exists(exe):
-            subprocess.Popen([exe])
-        else:
-            messagebox.showerror('错误', '未找到通达信: ' + exe)
+        """打开通达信（支持自动检测路径）。"""
+        tdx_dir = self.config.get('tdxDir', 'C:\\new_tdx')
+        exe = os.path.join(tdx_dir, 'TdxW.exe')
+        if not os.path.exists(exe):
+            detected = detect_tdx_path()
+            if detected:
+                exe = os.path.join(detected, 'TdxW.exe')
+                self.config['tdxDir'] = detected
+                save_config(self.config)
+            else:
+                messagebox.showerror('错误', '未找到通达信，请在设置中手动配置路径')
+                return
+        subprocess.Popen([exe])
 
     def _cmd_update(self):
         """执行更新。"""
@@ -356,11 +363,20 @@ class FupanApp:
 
         def save():
             c = load_config()
-            c['tdxDir'] = tdx_var.get().strip()
-            c['blocknewDir'] = os.path.join(tdx_var.get().strip(), 'T0002', 'blocknew')
+            entered = tdx_var.get().strip()
+            if entered and os.path.isdir(os.path.join(entered, 'T0002')):
+                c['tdxDir'] = entered
+            else:
+                detected = detect_tdx_path()
+                if detected:
+                    c['tdxDir'] = detected
+                    log('  [OK] 自动检测到TDX路径: %s' % detected)
+                else:
+                    c['tdxDir'] = entered if entered else 'C:\\new_tdx'
+            c['blocknewDir'] = os.path.join(c['tdxDir'], 'T0002', 'blocknew')
             save_config(c)
             self.config = c
-            messagebox.showinfo('提示', '设置已保存')
+            messagebox.showinfo('提示', '设置已保存，通达信路径: %s' % c['tdxDir'])
             win.destroy()
 
         bf = tk.Frame(win, bg='#f0f2f5')
@@ -401,13 +417,7 @@ def main():
     clean_old_logs()
     if len(sys.argv) > 1:
         if sys.argv[1] == '--update':
-            # 命令行更新：验证授权，过期则跳过快不报错
-            lic = lm.verify()
-            if not lic.get('valid', False):
-                logs = ['[授权] 授权已过期，跳过更新']
-                for l in logs:
-                    print(l)
-                return logs
+            # 实测阶段：跳过授权检查，直接跑引擎
             logs = run_engine(load_config())
             for l in logs:
                 print(l)

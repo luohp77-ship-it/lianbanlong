@@ -13,7 +13,15 @@ from datetime import datetime, timedelta
 from functools import lru_cache
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parent.resolve()
+# 区分 PyInstaller 打包模式和源码模式
+# PyInstaller onefile 模式：sys.executable 指向 exe 实际路径
+# 源码模式：__file__ 指向当前文件
+if getattr(sys, 'frozen', False):
+    # 打包为 exe 时，配置文件放在 exe 同级目录
+    _exe_dir = Path(sys.executable).parent.resolve()
+    BASE_DIR = _exe_dir
+else:
+    BASE_DIR = Path(__file__).parent.resolve()
 CONFIG_FILE = BASE_DIR / 'config.json'
 DATA_DIR = BASE_DIR / 'data'
 LOG_DIR = BASE_DIR / 'logs'
@@ -480,6 +488,102 @@ def calc_board_days_tdx(code, target_date, is_st=False, yesterday_boards=None):
             break
 
     return max(days, 1)
+
+
+# ═══ 通达信路径自动检测 ═══
+
+def detect_tdx_path():
+    """自动检测通达信安装路径。
+
+    扫描常见路径 + 注册表反安装信息，返回第一个找到的路径，
+    未找到返回 None。
+
+    Returns:
+        通达信根目录路径（如 C:\\new_tdx），或 None。
+    """
+    # 常见安装路径（按优先级排列）
+    common_paths = [
+        r"C:\new_tdx64",
+        r"C:\new_tdx",
+        r"D:\new_tdx64",
+        r"D:\new_tdx",
+        r"E:\new_tdx64",
+        r"E:\new_tdx",
+        r"C:\tdx",
+        r"D:\tdx",
+        r"C:\tdx64",
+        r"D:\tdx64",
+        r"C:\TdxClaw",
+    ]
+
+    # 1. 扫描常见路径（检查 TdxW.exe 存在）
+    for p in common_paths:
+        if os.path.isdir(p):
+            exe = os.path.join(p, 'TdxW.exe')
+            if os.path.isfile(exe):
+                return p
+
+    # 2. 注册表查找（通达信安装器通常会写注册表）
+    try:
+        import winreg
+        # HKEY_LOCAL_MACHINE 卸载信息
+        for scope in [winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER]:
+            try:
+                key = winreg.OpenKey(scope,
+                    r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")
+                for i in range(200):
+                    try:
+                        subkey_name = winreg.EnumKey(key, i)
+                        subkey = winreg.OpenKey(key, subkey_name)
+                        try:
+                            name = winreg.QueryValueEx(subkey, "DisplayName")[0]
+                            if any(kw in name for kw in ('通达信', 'TongDaXin', 'tdx', 'TDX')):
+                                path = winreg.QueryValueEx(subkey, "InstallLocation")[0]
+                                if path and os.path.isdir(path):
+                                    return path
+                        except WindowsError:
+                            pass
+                        finally:
+                            winreg.CloseKey(subkey)
+                    except WindowsError:
+                        break
+                winreg.CloseKey(key)
+            except WindowsError:
+                pass
+    except ImportError:
+        pass
+
+    return None
+
+
+def check_day_writedisk(tdx_dir):
+    """检查并修复通达信 Day_WriteDisk 配置。
+
+    如果 Day_WriteDisk=0，自动改为 1 并返回 True，
+    否则返回 False。
+
+    Args:
+        tdx_dir: 通达信根目录路径。
+
+    Returns:
+        是否修复了配置。
+    """
+    if not tdx_dir:
+        return False
+    user_ini = os.path.join(tdx_dir, 'T0002', 'user.ini')
+    if not os.path.isfile(user_ini):
+        return False
+    try:
+        with open(user_ini, 'r', encoding='gbk', errors='replace') as f:
+            content = f.read()
+        if 'Day_WriteDisk=0' not in content:
+            return False
+        content = content.replace('Day_WriteDisk=0', 'Day_WriteDisk=1')
+        with open(user_ini, 'w', encoding='gbk', errors='replace') as f:
+            f.write(content)
+        return True
+    except (OSError, IOError):
+        return False
 
 
 # ═══ 阶段涨幅排名 ═══

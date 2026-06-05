@@ -67,6 +67,8 @@ def build():
         '--hidden-import=engine',
         '--hidden-import=utils',
         '--hidden-import=concept_analyzer',
+        '--hidden-import=license',
+        '--hidden-import=word_report',
         str(BASE_DIR / 'engine.py'),
     ])
 
@@ -84,6 +86,8 @@ def build():
         '--hidden-import=engine',
         '--hidden-import=utils',
         '--hidden-import=concept_analyzer',
+        '--hidden-import=license',
+        '--hidden-import=word_report',
         str(BASE_DIR / 'app.py'),
     ])
 
@@ -100,6 +104,8 @@ def build():
         '--hidden-import=engine',
         '--hidden-import=utils',
         '--hidden-import=concept_analyzer',
+        '--hidden-import=license',
+        '--hidden-import=word_report',
         str(BASE_DIR / 'install.py'),
     ])
 
