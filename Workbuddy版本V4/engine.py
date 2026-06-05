@@ -41,7 +41,7 @@ from utils import (
     set_tdx_dir, read_tdx_daily, calc_board_days_tdx, is_limit_up, is_limit_down,
     write_extern_user, set_column_green,
     calc_period_gain, set_code_name_map,
-    detect_tdx_path, check_day_writedisk,
+    detect_tdx_path, check_day_writedisk, stop_tdx_processes,
     DATA_DIR
 )
 from concept_analyzer import analyze_concepts_by_reason, get_top3_with_overlap, load_concept_map
@@ -551,7 +551,7 @@ def _write_blk_verified(filepath, codes, sector_name, up_stock_names=None):
 
 # ═══ 主引擎 ═══
 def run_engine(config=None, callback=None):
-    """复盘引擎主流程（V2.1：9步）。
+    """复盘引擎主流程（V4.0.1：9步）。
 
     步骤：
     1. 获取涨停(同花顺+ST补充)
@@ -572,10 +572,14 @@ def run_engine(config=None, callback=None):
     if config is None:
         config = load_config()
 
-    # ── 自动检测 TDX 路径（如果配置路径不存在） ──
+    # ── 自动检测 TDX 路径（校验是否为有效TDX安装，防止空目录骗取检测通过） ──
     tdx_dir = config.get('tdxDir', 'C:\\new_tdx')
-    if not os.path.isdir(tdx_dir):
-        log('  [WARN] 配置的TDX路径不存在: %s，尝试自动检测...' % tdx_dir, level='WARN')
+    # 判断是否有效的TDX安装：目录存在 + 有TdxW.exe + 有T0002配置目录
+    tdx_is_valid = (os.path.isdir(tdx_dir) and
+                    os.path.isfile(os.path.join(tdx_dir, 'TdxW.exe')) and
+                    os.path.isdir(os.path.join(tdx_dir, 'T0002', 'blocknew')))
+    if not tdx_is_valid:
+        log('  [WARN] 配置的TDX路径无效(空目录或无TdxW.exe): %s，尝试自动检测...' % tdx_dir, level='WARN')
         detected = detect_tdx_path()
         if detected:
             log('  [OK] 自动检测到TDX路径: %s' % detected)
@@ -613,7 +617,7 @@ def run_engine(config=None, callback=None):
         target = get_latest_trading_day(prev)
         d = target.strftime('%Y%m%d')
 
-    log('--- 复盘引擎 V3.1 目标日期: %s ---' % d)
+    log('--- 连板龙 V4.0.1 目标日期: %s ---' % d)
 
     # ── 1. 获取涨停数据（同花顺 + 东财ST补充）──
     log('  获取涨停(同花顺)...')
@@ -858,6 +862,7 @@ def run_engine(config=None, callback=None):
 
     # ── 8. 写入板块文件+extern_user.txt ──
     log('  写入通达信板块...')
+    stop_tdx_processes(tdx_dir)
 
     # 排序规则：
     #   ZFB/SYLB/概念板块 → 按连板天数降序（高连板在前）
@@ -928,6 +933,20 @@ def run_engine(config=None, callback=None):
             if os.path.exists(src):
                 shutil.copy2(src, dst)
         log('  LastSync .blk 同步完成')
+
+    # ── 写入验证：回读检查关键板块文件是否真的写入了 ──
+    verify_ok = True
+    for key_fn in ['ZFB.blk', 'SB.blk', 'SYLB.blk', 'DT.blk']:
+        fp = os.path.join(blocknew_dir, key_fn)
+        if os.path.isfile(fp):
+            size = os.path.getsize(fp)
+            log('  [验证] %s: %d字节 (%d只股票)' % (
+                key_fn, size, size // 7 if size > 0 else 0))
+        else:
+            log('  [ERROR] %s 未找到！路径: %s' % (key_fn, fp), level='ERROR')
+            verify_ok = False
+    if verify_ok:
+        log('  [OK] 板块文件写入验证通过')
 
     # ── 8b. 写入 extern_user.txt（涨停原因+所属概念 → TDX自定义列）──
     log('  写入自定义数据列(涨停原因+所属概念)...')
@@ -1442,10 +1461,14 @@ def install_blocks(config=None, callback=None, concept_names=None, counts=None):
     if config is None:
         config = load_config()
 
-    # ── 自动检测 TDX 路径（如果配置路径不存在） ──
+    # ── 自动检测 TDX 路径（校验是否为有效TDX安装，防止空目录骗取检测通过） ──
     tdx_dir = config.get('tdxDir', 'C:\\new_tdx')
-    if not os.path.isdir(tdx_dir):
-        log('  [WARN] 配置的TDX路径不存在: %s，尝试自动检测...' % tdx_dir, level='WARN')
+    # 判断是否有效的TDX安装：目录存在 + 有TdxW.exe + 有T0002配置目录
+    tdx_is_valid = (os.path.isdir(tdx_dir) and
+                    os.path.isfile(os.path.join(tdx_dir, 'TdxW.exe')) and
+                    os.path.isdir(os.path.join(tdx_dir, 'T0002', 'blocknew')))
+    if not tdx_is_valid:
+        log('  [WARN] 配置的TDX路径无效(空目录或无TdxW.exe): %s，尝试自动检测...' % tdx_dir, level='WARN')
         detected = detect_tdx_path()
         if detected:
             log('  [OK] 自动检测到TDX路径: %s' % detected)
@@ -1466,6 +1489,9 @@ def install_blocks(config=None, callback=None, concept_names=None, counts=None):
 
     config['blocknewDir'] = blocknew_dir
     save_config(config)
+
+    # 关闭运行中的TDX（防止文件锁定导致写入失败）
+    stop_tdx_processes(tdx_dir)
 
     log('--- 安装通达信复盘板块(V2: %d个) ---' % len(SECTORS))
 

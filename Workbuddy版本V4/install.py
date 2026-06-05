@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""连板龙 V4.0 安装器
+"""连板龙 V4.0.1 安装器
 1. 17个板块（含R20D/R60D）
 2. V4综合评分概念分析
 3. 固定路径安装 + 桌面快捷方式
@@ -103,7 +103,7 @@ def create_shortcut(target_path):
 $ws = New-Object -ComObject WScript.Shell
 $shortcut = $ws.CreateShortcut("%s")
 $shortcut.TargetPath = "%s"
-$shortcut.Description = "连板龙 V4 - 通达信自动复盘"
+$shortcut.Description = "连板龙 V4.0.1 - 通达信自动复盘"
 $shortcut.WorkingDirectory = "%s"
 $shortcut.Save()
 ''' % (shortcut_path, target_path, INSTALL_DIR)
@@ -177,7 +177,7 @@ Register-ScheduledTask -TaskName "{task_name}" -Action $action -Trigger $trigger
 def install():
     """执行完整安装流程。"""
     print("=" * 60)
-    print("连板龙 V4 安装器")
+    print("连板龙 V4.0.1 安装器")
     print("=" * 60)
 
     # ── 1. 固定路径安装 ──
@@ -257,7 +257,7 @@ def install():
 
 def uninstall():
     """卸载：删除安装目录 + 快捷方式 + 定时任务。"""
-    print("卸载连板龙 V4...")
+    print("卸载连板龙 V4.0.1...")
     try:
         import subprocess
         # 删除定时任务

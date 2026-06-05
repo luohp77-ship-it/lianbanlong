@@ -586,6 +586,68 @@ def check_day_writedisk(tdx_dir):
         return False
 
 
+def stop_tdx_processes(tdx_dir=None):
+    """检测并关闭正在运行的TDX进程（避免写入时文件锁定导致板块不刷新）。
+
+    通达信运行时会锁定 gridtab.dat、blocknew.cfg 等文件，
+    此时写入会失败或写入后通达信不重新读取。
+
+    Args:
+        tdx_dir: 可选，仅用于日志提示。
+
+    Returns:
+        是否关闭了至少一个TDX进程。
+    """
+    try:
+        import psutil
+        tdx_keywords = ['tdxw.exe', 'xiadan.exe']
+        killed = False
+        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            try:
+                pname = (proc.info['name'] or '').lower()
+                if any(kw in pname for kw in tdx_keywords):
+                    log('  [WARN] 检测到TDX运行(PID=%d: %s)，正在关闭...' %
+                        (proc.info['pid'], proc.info['name']), level='WARN')
+                    proc.terminate()
+                    proc.wait(timeout=5)
+                    log('  [OK] TDX已关闭' % proc.info['pid'])
+                    killed = True
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.TimeoutExpired):
+                pass
+        if not killed:
+            log('  [OK] 未检测到运行中的TDX进程')
+        return killed
+    except ImportError:
+        log('  [提示] psutil未安装，跳过TDX进程检测（如需此功能: pip install psutil）')
+    return False
+
+    如果 Day_WriteDisk=0，自动改为 1 并返回 True，
+    否则返回 False。
+
+    Args:
+        tdx_dir: 通达信根目录路径。
+
+    Returns:
+        是否修复了配置。
+    """
+    if not tdx_dir:
+        return False
+    user_ini = os.path.join(tdx_dir, 'T0002', 'user.ini')
+    if not os.path.isfile(user_ini):
+        return False
+    try:
+        with open(user_ini, 'r', encoding='gbk', errors='replace') as f:
+            content = f.read()
+        if 'Day_WriteDisk=0' not in content:
+            return False
+        content = content.replace('Day_WriteDisk=0', 'Day_WriteDisk=1')
+        with open(user_ini, 'w', encoding='gbk', errors='replace') as f:
+            f.write(content)
+        return True
+    except (OSError, IOError):
+        return False
+
+
 # ═══ 阶段涨幅排名 ═══
 
 def calc_period_gain(tdx_dir, target_date, period_days=20, top_n=30, cutoff_days=60):

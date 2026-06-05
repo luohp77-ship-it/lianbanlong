@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""连板龙 V4.0 - 通达信自动复盘桌面应用
+"""连板龙 V4.0.1 - 通达信自动复盘桌面应用
 
+V4.0.1变更（TDX路径自动检测 + Day_WriteDisk修复）：
+- 新增 detect_tdx_path()：自动扫描常见路径+注册表定位通达信
+- 新增 check_day_writedisk()：自动修复 Day_WriteDisk=0 配置
+- 引擎/安装/设置面板均集成自动检测，无需手动设置路径
 V4.0变更（订阅制 + 授权系统）：
 - 按年订阅制 + 30日试用（RSA签名验证）
 - 用户中心扫码绑定微信（推送不再依赖 ServerChan）
@@ -37,13 +41,13 @@ from license import LicenseManager, ActivationError
 
 
 class FupanApp:
-    """连板龙 V4.0 桌面应用。"""
+    """连板龙 V4.0.1 桌面应用。"""
 
     def __init__(self):
         self.config = load_config()
         self.lm = LicenseManager()
         self.root = tk.Tk()
-        self.root.title('连板龙 V4 - 通达信自动复盘')
+        self.root.title('连板龙 V4.0.1 - 通达信自动复盘')
         self.root.geometry('720x580')
         self.root.minsize(640, 500)
         self.root.configure(bg='#f0f2f5')
@@ -395,7 +399,7 @@ class FupanApp:
 
     def run(self):
         """启动应用。"""
-        self.logbox.insert('end', '连板龙 V4.0 启动\n')
+        self.logbox.insert('end', '连板龙 V4.0.1 启动\n')
         lic_info = self.lm.verify()
         if lic_info['valid']:
             self.logbox.insert('end', '[授权] %s 剩余 %d 天\n' % (lic_info['type'], lic_info['days_left']))
